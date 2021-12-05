@@ -1,0 +1,16 @@
+*.h5
+*.txt
+*.*
+!.gitattributes
+!.gitignore
+!readme.md
+!.gitkeep
+!*.py
+!*.json
+!*.yaml
+!*.sh
+!*.cpp
+!*.c
+!*.h
+*__pycache__
+/dataset/
