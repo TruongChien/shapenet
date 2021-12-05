@@ -1,9 +1,9 @@
 import networkx as nx
 import numpy as np
 
-from shapgnet.models.adjacency_encoder import AdjacencyEncoder
-from shapgnet.models.adjacency_decoder import AdjacencyDecoder
-from shapgnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
+from ..models.adjacency_encoder import AdjacencyEncoder
+from ..models.adjacency_decoder import AdjacencyDecoder
+from ..external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
 import matplotlib.pyplot as plt
 import time
 from datetime import timedelta

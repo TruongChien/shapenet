@@ -1,6 +1,6 @@
 import io
 
-from shapgnet.model_config import ModelSpecs
+from ..model_config import ModelSpecs
 
 spec = """train: True                 # train or not,  default is True for generation we only need load pre-trained model
 active: 'grid_small'        # dataset set generated.

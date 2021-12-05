@@ -13,16 +13,16 @@ import torch
 import torch.utils as tutil
 import pandas as pd
 
-from shapgnet import create_graphs
-from shapgnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
-from shapgnet.generator_trainer import GeneratorTrainer
-from shapgnet.model_config import ModelSpecs
-from shapgnet.model_creator import ModelCreator
-from shapgnet.models.adjacency_decoder import AdjacencyDecoder
-from shapgnet.models.sampler.GraphSeqSampler import GraphSeqSampler
-from shapgnet.plotlib import plot
-from shapgnet.plotlib.plot import draw_single_graph
-from shapgnet.utils import fmt_print, fmtl_print
+from shapegnet import create_graphs
+from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
+from shapegnet.generator_trainer import GeneratorTrainer
+from shapegnet.model_config import ModelSpecs
+from shapegnet.model_creator import ModelCreator
+from shapegnet.models.adjacency_decoder import AdjacencyDecoder
+from shapegnet.models.sampler.GraphSeqSampler import GraphSeqSampler
+from shapegnet.plotlib import plot
+from shapegnet.plotlib.plot import draw_single_graph
+from shapegnet.utils import fmt_print, fmtl_print
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

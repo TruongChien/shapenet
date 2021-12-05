@@ -22,24 +22,24 @@ def preprocess(A):
     A_normal = np.dot(np.dot(D, A_hat), D)
     return A_normal
 
-
-def BFS(self, g, start):
-    v = v
-    e = e
-
-    visited = [False] * self.v
-    q = [start]
-    visited[start] = True
-
-    while q:
-        vis = q[0]
-        print(vis, end=' ')
-        q.pop(0)
-
-        for i in range(self.v):
-            if (g.adj[vis][i] == 1 and (not visited[i])):
-                q.append(i)
-                visited[i] = True
+#
+# def BFS(self, g, start):
+#     v = v
+#     e = e
+#
+#     visited = [False] * self.v
+#     q = [start]
+#     visited[start] = True
+#
+#     while q:
+#         vis = q[0]
+#         print(vis, end=' ')
+#         q.pop(0)
+#
+#         for i in range(self.v):
+#             if (g.adj[vis][i] == 1 and (not visited[i])):
+#                 q.append(i)
+#                 visited[i] = True
 
 
 def bfs_seq(input_graph, start_id):

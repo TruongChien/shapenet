@@ -4,10 +4,8 @@ import torch
 
 # use pytorch dataloader
 from ..adjacency_encoder import AdjacencyEncoder
-# use pytorch dataloader
 from ..adjacency_flexible_encoder import AdjacencyFlexEncoder
 from ...models.sampler.utils import bfs_seq
-import time
 
 
 class GraphSeqSampler(torch.utils.data.Dataset):

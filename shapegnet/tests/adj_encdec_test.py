@@ -1,9 +1,9 @@
 import networkx as nx
 import numpy as np
 
-from shapnet.models.adjacency_decoder import AdjacencyDecoder
-from shapnet.models.adjacency_encoder import AdjacencyEncoder
-from shapnet.models.sampler.utils import bfs_seq
+from ..models.adjacency_decoder import AdjacencyDecoder
+from ..models.adjacency_encoder import AdjacencyEncoder
+from ..models.sampler.utils import bfs_seq
 
 
 def test_encode_decode_adj():

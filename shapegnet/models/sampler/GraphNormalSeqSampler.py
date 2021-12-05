@@ -3,7 +3,7 @@ import networkx as nx
 import torch
 
 # use pytorch dataloader
-from shapegnet.models.adjacency_encoder import AdjacencyEncoder
+from ..adjacency_encoder import AdjacencyEncoder
 
 
 class GraphSeqNormalSampler(torch.utils.data.Dataset):

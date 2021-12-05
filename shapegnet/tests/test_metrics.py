@@ -1,5 +1,5 @@
 import networkx as nx
-from shapgnet.utils import perturb
+from ..utils import perturb
 
 
 def test_perturbed():
