@@ -12,5 +12,9 @@
 !*.cpp
 !*.c
 !*.h
+!*.md
+!*.LICENSE
+!*.sh
+!*.ipynb
 *__pycache__
 /dataset/

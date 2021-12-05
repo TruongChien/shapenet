@@ -3,7 +3,7 @@
 
 This repository is the PyTorch implementation of graph generative models. 
 - GraphRNN a graph generative model using auto-regressive
-- Custome GraphRNN on going work on improvement.
+- Custom GraphRNN ongoing work on improvement.
 
 [Jiaxuan You](https://cs.stanford.edu/~jiaxuan/)\*, [Rex Ying](https://cs.stanford.edu/people/rexy/)\*
 , [Xiang Ren](http://www-bcf.usc.edu/~xiangren/), [William L. Hamilton](https://stanford.edu/~wleif/)
@@ -27,14 +27,17 @@ pip install -r requirements.txt
 
 Create config.yaml file
 
-By default each model under experiment create sub-dir in results dir.  Both configured in config.yaml
-Note not all variable syntactically checked.   Validation still in TODO.
+By default trainer will create directory indicated in config.yaml file, each model under result
+Both configured in config.yaml Note not all variable syntactically checked. 
+Validation for config.yaml still in TODO not all done so please use existing example.
 
 Each experiment create set of directories.  Inside each directory we have generated graph 
-that used under a train a model.   During prediction phase graph serialized to pickle file.
-
+that used for a train a model.  All model files serialized to pickle files.
 
 ## Test run
+
+- Generative notebook mainly to run on colab
+
 
 ```bash
 python main.py

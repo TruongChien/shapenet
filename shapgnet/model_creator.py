@@ -1,10 +1,13 @@
+# Model Creator Factory class
+#
+# Responsible for creating models , model trainers based on Trainer specification.
+# Mustafa
 from .generator_trainer import GeneratorTrainer
 from .model_config import ModelSpecs
 from .models.GraphGru import GraphGRU
 from .models.GraphLSTM import GraphLSTM
 from .rnn_generator import RnnGenerator
 from .utils import fmtl_print
-import pprint
 
 
 class ModelCreator:
@@ -12,7 +15,6 @@ class ModelCreator:
      Create model and model trainer.
 
     """
-
     def __init__(self, trainer_spec: ModelSpecs, device, debug=False, verbose=False):
         """
 
