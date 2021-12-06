@@ -19,6 +19,10 @@ import torch
 import yaml
 from torch.utils.tensorboard import SummaryWriter
 from typing import List
+from typing import List
+from typing import List, Set, Dict, Tuple, Optional
+from typing import Callable, Iterator, Union, Optional, List
+from typing import Union, Any, List, Optional, cast
 
 from .graph_tools import graph_from_file
 from .utils import fmt_print, fmtl_print
@@ -1151,7 +1155,7 @@ class ModelSpecs:
         """
         return self.graph_specs
 
-    def get_active_model_prediction_files(self, reverse=True) -> list[str]:
+    def get_active_model_prediction_files(self, reverse=True) -> List[str]:
         """
          Method return all prediction model generated.
         """
@@ -1216,7 +1220,7 @@ class ModelSpecs:
     #     dist_clustering = eval.stats.clustering_stats(real_g_list, target_g_list)
     #     return dist_degree, dist_clustering
 
-    def get_last_graph_stat(self, num_samples=1) -> list[nx.classes.graph.Graph]:
+    def get_last_graph_stat(self, num_samples=1) -> List[nx.classes.graph.Graph]:
         """
 
         """
@@ -1227,7 +1231,7 @@ class ModelSpecs:
         graphs = graph_from_file(last_file_path)
         return graphs
 
-    def get_prediction_graph(self, num_samples=1, reverse=False) -> list[nx.classes.graph.Graph]:
+    def get_prediction_graph(self, num_samples=1, reverse=False) -> List[nx.classes.graph.Graph]:
         """
 
         :param num_samples:
@@ -1323,7 +1327,7 @@ class ModelSpecs:
     def done(self):
         self.writer.close()
 
-    def get_model_submodels(self) -> list[str]:
+    def get_model_submodels(self) -> List[str]:
         keys = self.model.keys()
         return [k for k in keys]
 
