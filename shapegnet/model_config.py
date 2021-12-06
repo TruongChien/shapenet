@@ -18,6 +18,7 @@ import networkx as nx
 import torch
 import yaml
 from torch.utils.tensorboard import SummaryWriter
+from typing import List
 
 from .graph_tools import graph_from_file
 from .utils import fmt_print, fmtl_print
@@ -1150,7 +1151,7 @@ class ModelSpecs:
         """
         return self.graph_specs
 
-    def get_active_model_prediction_files(self, epoch=None, reverse=True) -> list[str]:
+    def get_active_model_prediction_files(self, reverse=True) -> list[str]:
         """
          Method return all prediction model generated.
         """
