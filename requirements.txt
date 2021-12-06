@@ -99,7 +99,7 @@ python-louvain
 pytz==2021.3
 pyu2f
 pyvista==0.32.1
-pyviz-comms==2.1.0
+pyviz-comms
 pywin32==302
 pywinpty==1.1.5
 PyYAML
