@@ -11,6 +11,12 @@ from .mmd import compute_mmd
 from .mmd import gaussian
 from .mmd import gaussian_emd
 import traceback
+from typing import List
+from typing import List
+from typing import List, Set, Dict, Tuple, Optional
+from typing import Callable, Iterator, Union, Optional, List
+from typing import Union, Any, List, Optional, cast
+from typing import AnyStr
 
 
 def degree_worker(G):
@@ -176,8 +182,8 @@ def orca(graph, default_location_orca='./external/graphrnn_eval/orca/',
     return node_orbit_counts
 
 
-def motif_stats(graph_ref_list: list[networkx.classes.graph.Graph],
-                graph_pred_list: list[networkx.classes.graph.Graph],
+def motif_stats(graph_ref_list: List[networkx.classes.graph.Graph],
+                graph_pred_list: List[networkx.classes.graph.Graph],
                 motif_type='4cycle', ground_truth_match=None, bins=100):
     # graph motif counts (int for each graph)
     # normalized by graph size
