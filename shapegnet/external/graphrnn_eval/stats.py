@@ -236,8 +236,8 @@ def motif_stats(graph_ref_list: List[networkx.classes.graph.Graph],
     return mmd_dist
 
 
-def orbit_stats_all(graph_ref_list: list[networkx.classes.graph.Graph],
-                    graph_pred_list: list[networkx.classes.graph.Graph], debug_orca=True):
+def orbit_stats_all(graph_ref_list: List[networkx.classes.graph.Graph],
+                    graph_pred_list: List[networkx.classes.graph.Graph], debug_orca=True):
     """
     Details here
     (Refactored bunch of staff to make all this staff to work)
