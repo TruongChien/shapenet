@@ -1,5 +1,5 @@
 train: True                 # train or not,  default is True for generation we only need load pre-trained model
-active: 'grid_small'        # dataset set generated.
+active: 'grid_min'          # dataset set generated.
 use_model: 'GraphGruRnn'    # model to use , it must be defined in models section.
 draw_prediction: True       # at the of training draw.  (TODO here now it will draw last epocs)
 load_model: True            # load model or not, and what
@@ -7,7 +7,7 @@ load_epoch: 500             # load model.  last epoch
 save_model: True            # save model,
 regenerate: True            # regenerated,  factor when indicated by epochs_save
 active_setting: mini        # indicate what setting to use, so we can switch from debug to production
-evaluate: True
+evaluate: True              # will run evaluation
 
 early_stopping:
   monitor: loss
@@ -18,18 +18,21 @@ early_stopping:
 settings:
   # debug mode
   debug:
+    early_stopping: True
     epochs_log:  1000
     start_test:  10
     epochs_test: 10
     epochs_save: 10
+    tensorboard_update: 10
   # baseline
   mini:
     # if we need enable early stopping
     early_stopping: True
     epochs_log: 1000
-    start_test: 10
-    epochs_test: 10
-    epochs_save: 50
+    start_test: 2
+    epochs_test: 2
+    epochs_save: 2
+    tensorboard_update: 10
   # baseline
   baseline:
     early_stopping: True
@@ -37,6 +40,7 @@ settings:
     start_test:  100
     epochs_test: 100
     epochs_save: 100
+    tensorboard_update: 100
 
 debug:
   # debug graph generation
@@ -145,12 +149,12 @@ graph:
       grid_m: [ 10, 20 ]
     max_num_node: 0
     max_prev_node: 40
-  # just to test code logic
+  # this small grid. just to test code end to end
   grid_min:
-    epochs: 100
+    epochs: 20
     parameter_shrink: 2
-    batch_size: 32
-    test_batch_size: 32
+    batch_size: 64
+    test_batch_size: 64
     test_total_size: 1000
     num_layers: 4
     lr: 0.003

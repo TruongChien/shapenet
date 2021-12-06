@@ -329,15 +329,11 @@ class ModelSpecs:
         @param file_type:
         @return:
         """
-        """
-        Returns dict hold sub-model name,  checkpoint filename.
-        """
         models_filenames = {}
         for k in self.model:
             if k.find('model') != -1:
                 models_filenames[k] = str(self.model_save_path /
                                           Path(self.filename + '_' + k + '_' + str(self.load_epoch()) + file_type))
-
         return models_filenames
 
     def is_dropout(self) -> bool:
@@ -454,53 +450,39 @@ class ModelSpecs:
 
     def get_config_key(self, key):
         """
-
+        Return generic config element by key
         """
         if key in self.config:
             return self.config[key]
 
-    def get_dropout(self):
-        """
-
-        """
-        return self.get_config_key('dropout')
-
-    def runs(self):
-        """
-
-        """
-        return self.get_config_key('runs')
-
-    def get_hidden(self):
-        """
-
-        """
-        return self.get_config_key('hidden')
-
-    def early_stopping(self):
-        """
-        Return config related to early early_stopping.
-        TODO
-        """
-        return self.get_config_key('early_stopping')
-
     def epochs(self) -> int:
         """
-        @return: Return epocs, note each graph has own total epochs. ( depend on graph size)
+        Return epochs,
+        Note each graph has own total epochs. ( depend on graph size)
+        :return: number of epochs to run for given dataset, default 100
         """
-        return int(self.graph_specs['epochs'])
+        if 'epochs' in self.graph_specs:
+            return int(self.graph_specs['epochs'])
+        return 100
 
     def batch_size(self):
         """
+        Return batch size, each dataset has own batch size.
         Model batch size
+        :return:
         """
-        return self.graph_specs['batch_size']
+        if 'batch_size' in self.graph_specs:
+            return int(self.graph_specs['batch_size'])
+        return 32
 
     def num_layers(self):
         """
-        Models number of layers,  for example RNN uses default 4
+
+        :return:
         """
-        return self.graph_specs['num_layers']
+        if 'num_layers' in self.graph_specs:
+            return int(self.graph_specs['num_layers'])
+        return 4
 
     def parameter_shrink(self):
         """
@@ -1160,9 +1142,7 @@ class ModelSpecs:
         """
          Method return all prediction model generated.
         """
-        print("Getting last prediction files for", self.get_active_model(), self.get_active_train_graph())
-
-        if not self.is_trainer():
+        if not self.is_trained():
             raise Exception("Untrained model")
 
         if not os.path.exists(self.get_prediction_dir()):
@@ -1223,18 +1203,20 @@ class ModelSpecs:
 
     def get_last_graph_stat(self, num_samples=1) -> List[nx.classes.graph.Graph]:
         """
-
+        Method return last graph from generated graph list.
         """
         files = self.get_active_model_prediction_files()
         last_file = files[0]
         last_file_path = self.get_prediction_dir() / Path(last_file)
-
         graphs = graph_from_file(last_file_path)
         return graphs
 
     def get_prediction_graph(self, num_samples=1, reverse=False) -> List[nx.classes.graph.Graph]:
         """
+        Method return generator for all prediction files. Caller can iterate
+        each iter call will return one file name.
 
+        Note file are sorted.
         :param num_samples:
         :param reverse:
         :return:
@@ -1244,7 +1226,7 @@ class ModelSpecs:
             graph_file = self.get_prediction_dir() / Path(f)
             yield graph_file, graph_from_file(graph_file)
 
-    def is_trainer(self) -> bool:
+    def is_trained(self) -> bool:
         """
         Return true if model trainer,  it mainly checks if dat file created or not.
         :return: True if trainer
@@ -1253,8 +1235,8 @@ class ModelSpecs:
         if self._verbose:
             print("Model filenames", models_filenames)
 
-        for f in models_filenames:
-            if not os.path.isfile(f):
+        for k in models_filenames:
+            if not os.path.isfile(models_filenames[k]):
                 return False
 
         return True
@@ -1268,7 +1250,7 @@ class ModelSpecs:
         if self._verbose:
             fmtl_print('Trying load models last checkpoint...', self.active_model)
 
-        if not self.is_trainer():
+        if not self.is_trained():
             raise Exception("Untrained model")
 
         models_filenames = self.model_filenames()
@@ -1278,7 +1260,11 @@ class ModelSpecs:
         for m in models_filenames:
             if self._verbose:
                 print("Trying to load checkpoint file", models_filenames[m])
+
             check = torch.load(models_filenames[m])
+            if self._verbose:
+                print(check.keys())
+
             if 'epoch' in check:
                 checkpoints[m] = check['epoch']
 
@@ -1353,7 +1339,8 @@ class ModelSpecs:
 
         if 'early_stopping' in self._setting:
             return True
-        pass
+
+        return False
 
     def get_patience(self) -> int:
         """
@@ -1396,3 +1383,15 @@ class ModelSpecs:
         :return:
         """
         return True
+
+    def tensorboard_sample_update(self):
+        """
+        Return true if early stopping enabled.
+        :return:  default value False
+        """
+        if self._setting is None:
+            raise Exception("Initialize settings first")
+
+        if 'early_stopping' in self._setting:
+            return True
+

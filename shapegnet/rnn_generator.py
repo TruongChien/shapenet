@@ -42,10 +42,9 @@ class RnnGenerator(GeneratorTrainer):
         """
         Rnn Generator requires two networks, one for node level prediction and second for edge level prediction.
         """
-        super(RnnGenerator, self).__init__()
-
+        super(RnnGenerator, self).__init__(verbose=verbose, is_notebook=is_notebook)
         #
-        self.is_notebook = is_notebook
+        # self.is_notebook = is_notebook
         fmt_print("Creating generator", "RnnGenerator")
 
         # this is mostly for debugging code
@@ -393,10 +392,11 @@ class RnnGenerator(GeneratorTrainer):
         :return: last epoch
         """
         if self.trainer_spec.load():
+            print('attempting to load {} model node weights state_dict '
+                  'loaded from {}...'.format(self.trainer_spec.get_active_model(),
+                                             self.trainer_spec.model_node_file_name()))
             # load trained optimizer state_dict
             try:
-                print('attempting to load {} model node weights state_dict '
-                      'loaded...'.format(self.trainer_spec.get_active_model()))
                 checkpoint = torch.load(self.trainer_spec.model_node_file_name())
                 if 'model_state_dict' not in checkpoint:
                     raise Exception("model has no state dict")
@@ -415,6 +415,7 @@ class RnnGenerator(GeneratorTrainer):
 
                 print('attempting to load {} model edge weights state_dict '
                       'loaded...'.format(self.trainer_spec.get_active_model()))
+
                 checkpoint_edge_rnn = torch.load(self.trainer_spec.model_edge_file_name())
                 self.edge_rnn.load_state_dict(checkpoint_edge_rnn['model_state_dict'])
                 if 'model_state_dict' not in checkpoint:
@@ -431,18 +432,20 @@ class RnnGenerator(GeneratorTrainer):
                 print("Last checkpoint. ", checkpoint['epoch'])
 
                 return checkpoint['epoch']
+
             except FileNotFoundError as e:
                 print("Failed load model files. No saved model found.")
 
         return 0
 
-    def save_ifneed(self, epoch):
+    def save_ifneed(self, epoch, last_epoch=False):
         """
         Saves model checkpoint, when based on template settings.
+        :param last_epoch:
         :param epoch:  current epoch
         :return: True if saved
         """
-        if self.trainer_spec.save():
+        if self.trainer_spec.save() or last_epoch is True:
             if epoch % self.trainer_spec.epochs_save() == 0:
                 if self.trainer_spec.is_train_verbose():
                     fmt_print('Saving node model {}'.format(self.trainer_spec.model_node_file_name()))
@@ -494,7 +497,8 @@ class RnnGenerator(GeneratorTrainer):
             # save graphs
 
             # plot graph
-            self.plot_example(epoch, predictions[-1])
+            if epoch % self.trainer_spec.tensorboard_sample_update() == 0:
+                self.plot_example(epoch, predictions[-1])
 
             # save graph
             self.save_graphs(predictions, self.test_prediction_file(epoch, sample_time), verbose=self.verbose)
@@ -511,6 +515,8 @@ class RnnGenerator(GeneratorTrainer):
 
     def plot_example(self, epoch, example=None):
         """
+
+        Plot a graph as image in tensorboard imagaes.
 
         :param epoch:
         :param example:
@@ -531,9 +537,8 @@ class RnnGenerator(GeneratorTrainer):
             A = nx.from_numpy_matrix(A)
             plot_type = "prediction"
 
-        print("Saving graph image, type {} to tensorboard".format(plot_type))
-
         A = graph_from_tensors(A)
+
         # convert to image buffer and torch tensor
         img = graph2image_buffer(A)
         image = ToTensor()(img.copy()).unsqueeze(0)
@@ -557,30 +562,34 @@ class RnnGenerator(GeneratorTrainer):
         :return:
         """
         # load last epoch in case we do resuming.
-        epoch = self.load()
+        last_epoch = self.load()
         # tensorboard writer
         twriter = self.trainer_spec.writer
         # early stopping
         early_stopping = None
         if self.trainer_spec.is_early_stopping():
             early_stopping = EarlyStopping(patience=self.trainer_spec.get_patience(), verbose=False)
+
         # max epoch part of spec
         max_epochs = self.trainer_spec.epochs()
+        if self.verbose:
+            fmtl_print("max epoch", max_epochs)
+            fmtl_print("last epoch", last_epoch)
+
         active_mode = self.trainer_spec.active_model
         is_sample = self.is_sample_time
-        total_epoch_loss = 0
+        total_epoch_loss = 0.0
 
         if self.is_notebook:
-            tqdm_iter = tnrange(max_epochs)
+            tqdm_iter = tnrange(last_epoch, max_epochs)
         else:
-            tqdm_iter = tqdm(range(epoch, max_epochs))
+            tqdm_iter = tqdm(range(last_epoch, max_epochs))
 
         tqdm_iter.set_postfix({'total_epoch_loss': 0})
 
         for epoch in tqdm_iter:
 
-            # self.plot_example(epoch)
-
+            #self.plot_example(epoch)
             time_start = time.monotonic()
             total_epoch_loss = self.train_epoch(epoch)
             tqdm_iter.set_postfix({'total_epoch_loss': total_epoch_loss})
@@ -619,6 +628,8 @@ class RnnGenerator(GeneratorTrainer):
                                        'early stop': early_stopping.counter,
                                        'out of': early_stopping.patience,
                                        'saved': True})
-            # epoch += 1
+            last_epoch += 1
 
         self.trainer_spec.done()
+        if last_epoch >= max_epochs:
+            self.save_ifneed(last_epoch, last_epoch=True)

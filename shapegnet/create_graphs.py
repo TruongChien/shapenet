@@ -13,6 +13,7 @@ def dataset_graph_generator():
         'grid':          generate_grid,
         'grid_small':    generate_grid,
         'grid_big':      generate_grid,
+        'grid_min':      generate_grid,
         'caveman':       generate_caveman,
         'caveman_small': generate_caveman,
         'caveman_big':   generate_caveman,
