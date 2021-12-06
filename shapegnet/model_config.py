@@ -23,6 +23,7 @@ from typing import List
 from typing import List, Set, Dict, Tuple, Optional
 from typing import Callable, Iterator, Union, Optional, List
 from typing import Union, Any, List, Optional, cast
+from typing import AnyStr
 
 from .graph_tools import graph_from_file
 from .utils import fmt_print, fmtl_print
