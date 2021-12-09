@@ -582,7 +582,7 @@ class ModelSpecs:
             return self.graph_specs['do_randomwalk']
         return False
 
-    def max_num_node(self) -> int:
+    def max_nodes(self) -> int:
         """
         Maximum nodes for a graph.
         """
@@ -590,7 +590,7 @@ class ModelSpecs:
             return int(self.graph_specs['max_num_node'])
         return 0
 
-    def max_prev_node(self) -> int:
+    def max_depth(self) -> int:
         """
         Maximum nodes to track in BFS.
         """

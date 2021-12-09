@@ -127,10 +127,10 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     @return: return torch.util.data.DataLoader
     """
     # dataset initialization
-    if trainer_spec.max_prev_node() > 0:
+    if trainer_spec.max_depth() > 0:
         dataset = GraphSeqSampler(graphs,
-                                  max_depth=trainer_spec.max_prev_node(),
-                                  max_nodes=trainer_spec.max_num_node())
+                                  max_depth=trainer_spec.max_depth(),
+                                  max_nodes=trainer_spec.max_nodes())
     else:
         dataset = GraphSeqSampler(graphs)
 
@@ -265,8 +265,8 @@ def main_train(cmds, trainer_spec: ModelSpecs):
     # model graph specs
     print("###############################################")
     fmtl_print("Creating graphs type", trainer_spec.active)
-    fmtl_print("Maximum previous node to track", trainer_spec.max_prev_node())
-    fmtl_print("Maximum nodes to track", trainer_spec.max_num_node())
+    fmtl_print("Maximum previous node to track", trainer_spec.max_depth())
+    fmtl_print("Maximum nodes to track", trainer_spec.max_nodes())
 
     # create dataset based on specs in config.yaml
     graphs = create_graphs.create(trainer_spec)
@@ -278,8 +278,8 @@ def main_train(cmds, trainer_spec: ModelSpecs):
     #
     fmtl_print('traing/test/val ratio', trainer_spec.train_ratio(),
                trainer_spec.test_ratio(), trainer_spec.validation_ratio())
-    fmtl_print('max previous node', trainer_spec.max_prev_node())
-    fmtl_print('max number node', trainer_spec.max_num_node())
+    fmtl_print('max previous node', trainer_spec.max_depth())
+    fmtl_print('max number node', trainer_spec.max_nodes())
     fmtl_print('max/min number edge', max_num_edge, min_num_edge)
 
     # compute splits

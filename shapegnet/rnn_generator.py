@@ -200,15 +200,15 @@ class RnnGenerator(GeneratorTrainer):
         self.edge_rnn.eval()
 
         # generate graphs
-        max_num_node = int(self.trainer_spec.max_num_node())
+        max_num_node = int(self.trainer_spec.max_nodes())
 
         # prediction
         y_final_prediction = Variable(torch.zeros(batch_size,
                                                   max_num_node,
-                                                  self.trainer_spec.max_prev_node())).to(self.device)
+                                                  self.trainer_spec.max_depth())).to(self.device)
 
         x_step = Variable(torch.ones(batch_size, 1,
-                                     self.trainer_spec.max_prev_node()), requires_grad=False).to(self.device)
+                                     self.trainer_spec.max_depth()), requires_grad=False).to(self.device)
 
         for i in range(max_num_node):
             h = self.node_rnn(x_step)
@@ -217,9 +217,9 @@ class RnnGenerator(GeneratorTrainer):
 
             # num_layers, batch_size, hidden_size
             self.edge_rnn.hidden = torch.cat((h.permute(1, 0, 2), hidden_null), dim=0)
-            x_step = Variable(torch.zeros(batch_size, 1, self.trainer_spec.max_prev_node())).to(self.device)
+            x_step = Variable(torch.zeros(batch_size, 1, self.trainer_spec.max_depth())).to(self.device)
             output_x_step = Variable(torch.ones(batch_size, 1, 1)).to(self.device)
-            for j in range(min(self.trainer_spec.max_prev_node(), i + 1)):
+            for j in range(min(self.trainer_spec.max_depth(), i + 1)):
                 # get prediction for edge
                 output_y_pred_step = self.edge_rnn(output_x_step)
                 output_x_step = sample_sigmoid(output_y_pred_step,

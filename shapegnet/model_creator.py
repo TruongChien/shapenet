@@ -80,7 +80,7 @@ class ModelCreator:
         GraphRNN: Generating Realistic Graphs with Deep Auto-regressive Models
         """
         models = {}
-        node_rnn = GraphGRU(input_size=trainer_spec.max_prev_node(),
+        node_rnn = GraphGRU(input_size=trainer_spec.max_depth(),
                             batch_size=trainer_spec.batch_size(),
                             embedding_size=trainer_spec.embedding_size_rnn,
                             hidden_size=trainer_spec.hidden_size_rnn,
