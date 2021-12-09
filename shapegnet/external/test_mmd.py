@@ -2,8 +2,15 @@ import torch
 import numpy as np
 import time
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def compute_kernel(x, y):
+    """
+    @param x:
+    @param y:
+    @return:
+    """
     x_size = x.size(0)
     y_size = y.size(0)
     dim = x.size(1)
@@ -15,19 +22,21 @@ def compute_kernel(x, y):
 
 
 def compute_mmd(x, y):
+    """
+    @param x:
+    @param y:
+    @return:
+    """
     x_kernel = compute_kernel(x, x)
-    # print(x_kernel)
     y_kernel = compute_kernel(y, y)
-    # print(y_kernel)
     xy_kernel = compute_kernel(x, y)
-    # print(xy_kernel)
     return torch.mean(x_kernel) + torch.mean(y_kernel) - 2 * torch.mean(xy_kernel)
 
 
-def print_test_one():
+def print_test_one(device='cpu'):
     start = time.time()
-    x = torch.randn(4000, 1).cuda()
-    y = torch.randn(4000, 1).cuda()
+    x = torch.randn(4000, 1).to(device)
+    y = torch.randn(4000, 1).to(device)
     print(compute_mmd(x, y))
     end = time.time()
     print('GPU time:', end - start)
@@ -43,16 +52,6 @@ def print_test_two():
     print('MMD baseline', compute_mmd(x, y_baseline))
     print('MMD prediction', compute_mmd(x, y_pred))
 
-print_test_two()
 
-#
-# print('before',x)
-# print('MMD', compute_mmd(x,y))
-# x_idx = np.random.permutation(x.size(0))
-# x = x[x_idx,:]
-# print('after permutation',x)
-# print('MMD', compute_mmd(x,y))
-#
-#
-# end = time.time()
-# print('CPU time:', end-start)
+print_test_one()
+print_test_two()
