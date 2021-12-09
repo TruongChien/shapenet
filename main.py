@@ -28,7 +28,7 @@ from shapegnet.models.adjacency_decoder import AdjacencyDecoder
 from shapegnet.models.sampler.GraphSeqSampler import GraphSeqSampler
 from shapegnet.plotlib import plot
 from shapegnet.plotlib.plot import draw_single_graph
-from shapegnet.utils import fmt_print, fmtl_print
+from shapegnet.utils import fmt_print, fmtl_print, find_nearest
 from colorama import Fore, Style
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -152,33 +152,37 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     return dataset_loader
 
 
-def clean_graphs(graph_real, graph_pred, is_shuffle=True):
+def select_graph(real_graph, generated_graph, is_shuffle=True):
     """
-    Selecting graphs generated that have the similar sizes.
-    It is usually necessary for GraphRNN-S version, but not the full GraphRNN model.
+        We selecting graphs generated that have the similar sizes.
+
+    @param real_graph:
+    @param generated_graph:
+    @param is_shuffle:
+    @return:
     """
 
     #
     if is_shuffle:
-        random.shuffle(graph_real)
-        random.shuffle(graph_pred)
+        random.shuffle(real_graph)
+        random.shuffle(generated_graph)
 
     # get length
-    real_graph_len = np.array([len(graph_real[i]) for i in range(len(graph_real))])
-    pred_graph_len = np.array([len(graph_pred[i]) for i in range(len(graph_pred))])
+    real_graph_len = np.array([len(real_graph[i]) for i in range(len(real_graph))])
+    pred_graph_len = np.array([len(generated_graph[i]) for i in range(len(generated_graph))])
 
     fmt_print("Real graph size", real_graph_len)
     fmt_print("Prediction graph size", pred_graph_len)
 
-    # # select pred samples
-    # # The number of nodes are sampled from the similar distribution as the training set
-    # pred_graph_new = []
-    # pred_graph_len_new = []
-    # for value in real_graph_len:
-    #     pred_idx = find_nearest_idx(pred_graph_len, value)
-    #     pred_graph_new.append(graph_pred[pred_idx])
-    #     pred_graph_len_new.append(pred_graph_len[pred_idx])
-    # return graph_real, pred_graph_new
+    # select pred samples
+    pred_graph_new = []
+    pred_graph_len_new = []
+    for value in real_graph_len:
+        pred_idx = find_nearest(pred_graph_len, value)
+        pred_graph_new.append(generated_graph[pred_idx])
+        pred_graph_len_new.append(pred_graph_len[pred_idx])
+
+    return real_graph, pred_graph_new
 
 
 def compute_generic_stats(graph):
@@ -225,7 +229,7 @@ def evaluate(cmds, trainer_spec: ModelSpecs,
         #
         compute_generic_stats(epoch_predicted)
         compute_generic_stats(validate_set)
-        clean_graphs(test_set, epoch_predicted)
+        select_graph(test_set, epoch_predicted)
 
         # evaluate mmd test, between prediction and test
         mmd_degree = -1

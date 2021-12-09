@@ -255,6 +255,17 @@ def load_graph_prediction(graph_list, is_real=True):
     return graph_list
 
 
+def find_nearest(array, value):
+    """
+
+    @param array:
+    @param value:
+    @return:
+    """
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+
 def export_graphs_to_txt(graph_list, output_filename_prefix):
     """
 
