@@ -1,8 +1,8 @@
-# Shapenet Generative models
-
+# ShapeGen A Graph Generative models
 
 This repository is the PyTorch implementation of graph generative models. 
-- GraphRNN a graph generative model using auto-regressive
+- GraphRNN a graph generative model using auto-regressive.
+- NetGan and Customer implementation of NetGan.
 - Custom GraphRNN ongoing work on improvement.
 
 [Jiaxuan You](https://cs.stanford.edu/~jiaxuan/)\*, [Rex Ying](https://cs.stanford.edu/people/rexy/)\*
