@@ -472,8 +472,8 @@ class RnnGenerator(GeneratorTrainer):
     def test_prediction_file(self, epoch, sample_time):
         """
         Generated test prediction file name.
-        @param epoch:
-        @param sample_time:
+        @param epoch: current epoch
+        @param sample_time: and from what sample num
         @return:
         """
         return self.trainer_spec.prediction_filename(epoch, sample_time)
@@ -494,7 +494,6 @@ class RnnGenerator(GeneratorTrainer):
             while len(predictions) < self.trainer_spec.test_total_size():
                 # num graphs
                 predictions.extend(self.model_prediction())
-            # save graphs
 
             # plot graph
             if epoch % self.trainer_spec.tensorboard_sample_update() == 0:
