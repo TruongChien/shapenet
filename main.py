@@ -122,7 +122,7 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     Create dataset , dataset sampler based on trainer specification.
 
     @param trainer_spec: trainer specification, include strategy how to sample ration etc.
-    @param graphs: a graph that we use to train network
+    @param graphs: a graph that we use to train network.
     @param num_workers:
     @return: return torch.util.data.DataLoader
     """

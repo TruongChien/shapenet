@@ -18,45 +18,50 @@ class GraphSeqSampler(torch.utils.data.Dataset):
     on random starting node.
     """
 
-    def __init__(self, graphs, max_nodes=None, max_depth=None, max_iter=20000):
+    def __init__(self, graphs, max_nodes=None, max_depth=None, max_iter=20000, is_sorted=False):
 
-        self.sorted = False
-        self.adj_all = []
+        # sorted or not
+        self.sorted = is_sorted
+        #
+        self.A = []
+        #
         self.len_all = []
+        # max iteration
         self._max_iter = max_iter
+        #
         self.k = 10
 
         for g in graphs:
-            self.adj_all.append(np.asarray(nx.to_numpy_matrix(g)))
+            self.A.append(np.asarray(nx.to_numpy_matrix(g)))
             self.len_all.append(g.number_of_nodes())
 
         self.n = max_nodes
         self.depth = max_depth
 
-        if max_nodes is None:
+        if max_nodes is None or max_nodes == 0:
             self.n = max(self.len_all)
 
-        if max_depth is None:
-            self.depth = max(self.max_depth(max_iter=max_iter))
+        if max_depth is None or max_nodes == 0:
+            self.depth = max(self.max_depth())
 
         if self.sorted:
             self.depth = max_depth
             len_batch_order = np.argsort(np.array(self.len_all))[::-1]
             self.len_all = [self.len_all[i] for i in len_batch_order]
-            self.adj_all = [self.adj_all[i] for i in len_batch_order]
+            self.A = [self.A[i] for i in len_batch_order]
 
         self.encoder = AdjacencyEncoder()
         self.base_encoder = AdjacencyFlexEncoder(max_prev_node=self.depth)
 
     def __len__(self):
-        return len(self.adj_all)
+        return len(self.A)
 
     def __getitem__(self, idx):
         """
          Return training batch
          @return: x, y and len batch as dict 'x', 'y', 'len'
         """
-        A = self.adj_all[idx].copy()
+        A = self.A[idx].copy()
 
         # pad
         x_batch = np.zeros((self.n, self.depth))
@@ -95,8 +100,8 @@ class GraphSeqSampler(torch.utils.data.Dataset):
         k = self.k
 
         for _ in range(self.max_iter):
-            adj_idx = np.random.randint(len(self.adj_all))
-            A = self.adj_all[adj_idx].copy()
+            adj_idx = np.random.randint(len(self.A))
+            A = self.A[adj_idx].copy()
 
             permuted_xs = np.random.permutation(A.shape[0])
             A = A[np.ix_(permuted_xs, permuted_xs)]

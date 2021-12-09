@@ -18,6 +18,7 @@ import networkx as nx
 import torch
 import yaml
 from torch.utils.tensorboard import SummaryWriter
+# this is main colab fix.
 from typing import List
 from typing import List
 from typing import List, Set, Dict, Tuple, Optional
@@ -42,9 +43,9 @@ optimizer:
 
 class ModelSpecs:
     """
+    The class hold all trainer configuration settings.
 
     """
-
     def __init__(self, template_file_name='config.yaml', verbose=False):
         """
 
@@ -54,8 +55,10 @@ class ModelSpecs:
         if isinstance(template_file_name, str):
             fmtl_print("Loading", template_file_name)
 
-        # store poitne to config , after spec read serialize yaml to it.
+        # store point to current loaded config,
+        # after spec read serialize yaml to it.
         self.config = None
+
         # device
         self.device = 'cuda'
         fmtl_print("Device", self.device)
@@ -584,18 +587,22 @@ class ModelSpecs:
 
     def max_nodes(self) -> int:
         """
-        Maximum nodes for a graph.
+        Maximum nodes for a graph generation.
+        @return:
         """
         if 'max_num_node' in self.graph_specs:
             return int(self.graph_specs['max_num_node'])
+
         return 0
 
     def max_depth(self) -> int:
         """
         Maximum nodes to track in BFS.
+        @return:
         """
         if 'max_prev_node' in self.graph_specs:
             return int(self.graph_specs['max_prev_node'])
+
         return 0
 
     def set_max_num_node(self, m: int):
