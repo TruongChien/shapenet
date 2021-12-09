@@ -33,16 +33,22 @@ def add_tensor(x, y):
 
 
 def degree_stats(graph_ref_list, graph_pred_list, is_parallel=True, trace=False):
-    """ Compute the distance between the degree distributions of two unordered sets of graphs.
-    Args:
-      graph_ref_list, graph_target_list: two lists of networkx graphs to be evaluated
+    """
+    Compute the distance between the degree distributions of two unordered sets of graphs.
+
+    @param graph_ref_list:  two lists of networkx graphs to be evaluated
+    @param graph_pred_list:
+    @param is_parallel:
+    @param trace:
+    @return:
     """
     sample_ref = []
     sample_pred = []
     # in case an empty graph is generated
     graph_pred_list_remove_empty = [G for G in graph_pred_list if not G.number_of_nodes() == 0]
 
-    prev = datetime.now()
+    if trace:
+        prev = datetime.now()
     if is_parallel:
         with concurrent.futures.ProcessPoolExecutor() as executor:
             for deg_hist in executor.map(degree_worker, graph_ref_list):
@@ -50,7 +56,6 @@ def degree_stats(graph_ref_list, graph_pred_list, is_parallel=True, trace=False)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             for deg_hist in executor.map(degree_worker, graph_pred_list_remove_empty):
                 sample_pred.append(deg_hist)
-
     else:
         for i in range(len(graph_ref_list)):
             degree_temp = np.array(nx.degree_histogram(graph_ref_list[i]))
@@ -59,10 +64,9 @@ def degree_stats(graph_ref_list, graph_pred_list, is_parallel=True, trace=False)
             degree_temp = np.array(nx.degree_histogram(graph_pred_list_remove_empty[i]))
             sample_pred.append(degree_temp)
 
-    print(len(sample_ref), len(sample_pred))
     mmd_dist = compute_mmd(sample_ref, sample_pred, kernel=gaussian_emd)
-    elapsed = datetime.now() - prev
     if trace:
+        elapsed = datetime.now() - prev
         print('Time computing degree mmd: ', elapsed)
     return mmd_dist
 

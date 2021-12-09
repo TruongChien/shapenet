@@ -1,9 +1,9 @@
 import networkx as nx
 import numpy as np
 
-from ..models.adjacency_encoder import AdjacencyEncoder
-from ..models.adjacency_decoder import AdjacencyDecoder
-from ..external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
+from shapegnet.models.adjacency_encoder import AdjacencyEncoder
+from shapegnet.models.adjacency_decoder import AdjacencyDecoder
+from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
 import matplotlib.pyplot as plt
 import time
 from datetime import timedelta
@@ -11,7 +11,12 @@ from datetime import timedelta
 np.random.seed(1234)
 
 
-def test_decoder(plot=False):
+def test_decoder(plot=False, run_orbits=False):
+    """
+
+    @param plot:
+    @return:
+    """
     original_graph = nx.erdos_renyi_graph(10, 0.4)
     original_graph_as_np = nx.to_numpy_array(original_graph)
     print(original_graph_as_np)
@@ -44,7 +49,8 @@ def test_decoder(plot=False):
         plt.show()
 
     print("Original graph", type(original_graph_as_np))
-    # Now let compute metric between two graph in simular way as it describe in GraphRNN
+    # Now let compute metric between two graph in similar way
+    # as it describe in GraphRNN
     # and NetGAN paper
 
     print("Running mmd degree")
@@ -56,14 +62,15 @@ def test_decoder(plot=False):
     print(mmd_clustering)
 
     print("Running orbits")
-    start_time = time.monotonic()
-    mmd_4orbits = orbit_stats_all([original_graph], [decoded_graph])
-    end_time = time.monotonic()
-    print(timedelta(seconds=end_time - start_time))
-    print(mmd_4orbits)
+    if run_orbits is True:
+        start_time = time.monotonic()
+        mmd_4orbits = orbit_stats_all([original_graph], [decoded_graph])
+        end_time = time.monotonic()
+        print(timedelta(seconds=end_time - start_time))
+        print(mmd_4orbits)
 
 
-def test_large_graph(num_graph=10, num_nodes=10):
+def test_large_graph(num_graph=10, num_nodes=10, run_orbits=False):
     """
     Test for mmd stats.
     """
@@ -79,7 +86,7 @@ def test_large_graph(num_graph=10, num_nodes=10):
     mmd_degree = degree_stats(original_graphs, decoded_graphs)
     end_time = time.monotonic()
     print(timedelta(seconds=end_time - start_time))
-    #print(mmd_degree)
+    # print(mmd_degree)
 
     print("Running cluster stats")
     start_time = time.monotonic()
@@ -87,16 +94,18 @@ def test_large_graph(num_graph=10, num_nodes=10):
     end_time = time.monotonic()
     print(timedelta(seconds=end_time - start_time))
 
-    #print(mmd_clustering)
+    # print(mmd_clustering)
 
-    #print("Running orbits")
-    start_time = time.monotonic()
-    mmd_4orbits = orbit_stats_all(original_graphs, decoded_graphs)
-    end_time = time.monotonic()
-    print(timedelta(seconds=end_time - start_time))
-    #print(mmd_4orbits)
+    # print("Running orbits")
+    print("Running orbits")
+    if run_orbits is True:
+        start_time = time.monotonic()
+        mmd_4orbits = orbit_stats_all(original_graphs, decoded_graphs)
+        end_time = time.monotonic()
+        print(timedelta(seconds=end_time - start_time))
+        # print(mmd_4orbits)
 
 
 if __name__ == '__main__':
-    # test_decoder()
-    test_large_graph()
+    test_decoder()
+    # test_large_graph()
