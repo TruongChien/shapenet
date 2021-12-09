@@ -40,9 +40,11 @@ class GraphSeqSampler(torch.utils.data.Dataset):
 
         if max_nodes is None or max_nodes == 0:
             self.n = max(self.len_all)
+            print("COMPUTED DEPTH", self.n)
 
         if max_depth is None or max_nodes == 0:
             self.depth = max(self.max_depth())
+            print("COMPUTED DEPTH", self.depth)
 
         if self.sorted:
             self.depth = max_depth
@@ -93,13 +95,13 @@ class GraphSeqSampler(torch.utils.data.Dataset):
 
     def max_depth(self):
         """
-        Computes max depth
+        Computes max depth for input graph.
         @return:
         """
         depth = []
         k = self.k
 
-        for _ in range(self.max_iter):
+        for _ in range(self._max_iter):
             adj_idx = np.random.randint(len(self.A))
             A = self.A[adj_idx].copy()
 

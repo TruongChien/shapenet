@@ -46,6 +46,7 @@ class ModelSpecs:
     The class hold all trainer configuration settings.
 
     """
+
     def __init__(self, template_file_name='config.yaml', verbose=False):
         """
 
@@ -592,16 +593,20 @@ class ModelSpecs:
         """
         if 'max_num_node' in self.graph_specs:
             return int(self.graph_specs['max_num_node'])
+        else:
+            self.graph_specs['max_num_node'] = int(0)
 
         return 0
 
     def max_depth(self) -> int:
         """
         Maximum nodes to track in BFS.
-        @return:
+        @return: Maximum nodes to track in BFS or zero
         """
         if 'max_prev_node' in self.graph_specs:
             return int(self.graph_specs['max_prev_node'])
+        else:
+            self.graph_specs['max_prev_node'] = int(0)
 
         return 0
 
@@ -1402,3 +1407,11 @@ class ModelSpecs:
         if 'early_stopping' in self._setting:
             return True
 
+    def set_depth(self, graph_depth):
+        """
+
+        @param graph_depth:
+        @return:
+        """
+        if 'max_prev_node' in self.graph_specs:
+            self.graph_specs['max_prev_node'] = graph_depth

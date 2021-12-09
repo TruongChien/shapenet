@@ -163,8 +163,8 @@ graph:
     graph_spec:
       grid_n: [ 2, 5 ]
       grid_m: [ 2, 6 ]
-    #    max_num_node: 10
-    max_prev_node: 15
+    max_num_node: 0
+    max_prev_node: 0
   grid_small:
     epochs: 500
     parameter_shrink: 2

@@ -22,7 +22,6 @@ def dataset_graph_generator():
 
 def gracefully_exit(msg):
     """
-
     """
     print(msg)
     sys.exit()
@@ -60,6 +59,7 @@ def generate_grid(specs: ModelSpecs):
         for j in range(grid_m[0], grid_m[1]):
             graphs.append(nx.grid_2d_graph(i, j))
 
+    specs.set_depth(10)
     return graphs
 
 
