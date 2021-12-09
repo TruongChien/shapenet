@@ -41,6 +41,18 @@ optimizer:
 """
 
 
+def extract_value_from_file(f, key):
+    """
+    @param f:
+    @param key:
+    @return:
+    """
+    parsed = f.split('_')
+    for i, k in enumerate(parsed):
+        if key in k:
+            return parsed[i + 1]
+
+
 class ModelSpecs:
     """
     The class hold all trainer configuration settings.
@@ -1224,20 +1236,30 @@ class ModelSpecs:
         graphs = graph_from_file(last_file_path)
         return graphs
 
-    def get_prediction_graph(self, num_samples=1, reverse=False) -> List[nx.classes.graph.Graph]:
+    def get_prediction_graph(self, num_samples=1, reverse=False, is_last=False) -> List[nx.classes.graph.Graph]:
         """
-        Method return generator for all prediction files. Caller can iterate
-        each iter call will return one file name.
+        Method return generator for all prediction files.
+        A Caller can iterate each iter call will return one file name.
 
         Note file are sorted.
         :param num_samples:
         :param reverse:
+        :param is_last:
         :return:
         """
+        if is_last is True:
+            files = self.get_active_model_prediction_files(reverse=reverse)
+            epoch = extract_value_from_file(files, "epoch")
+            sample_time = extract_value_from_file(files, "sample")
+            graph_file = self.get_prediction_dir() / Path(files)
+            yield epoch, sample_time, graph_file, graph_from_file(graph_file)
+
         files = self.get_active_model_prediction_files(reverse=reverse)
         for f in files:
+            epoch = extract_value_from_file(f, "epoch")
+            sample_time = extract_value_from_file(f, "sample")
             graph_file = self.get_prediction_dir() / Path(f)
-            yield graph_file, graph_from_file(graph_file)
+            yield epoch, sample_time, graph_file, graph_from_file(graph_file)
 
     def is_trained(self) -> bool:
         """

@@ -13,11 +13,13 @@ import sys
 import time
 from datetime import time
 from datetime import timedelta
+from pathlib import Path
 from typing import Final
 
 import numpy as np
 import torch
 import torch.utils as tutil
+import seaborn as sns
 
 from shapegnet import create_graphs
 from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
@@ -29,7 +31,9 @@ from shapegnet.models.sampler.GraphSeqSampler import GraphSeqSampler
 from shapegnet.plotlib import plot
 from shapegnet.plotlib.plot import draw_single_graph
 from shapegnet.utils import fmt_print, fmtl_print, find_nearest
-from colorama import Fore, Style
+import pandas as pd
+import matplotlib as plt
+from datetime import datetime
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -200,9 +204,10 @@ def compute_generic_stats(graph):
         fmtl_print('Average number of nodes (graph size {})'.format(len(graph)), num_nodes)
 
 
-def evaluate(cmds, trainer_spec: ModelSpecs,
-             epoch_start=1,
-             epoch_step=1):
+def evaluate_prediction(trainer_spec: ModelSpecs,
+                        last_epoch_only=False,
+                        default_loc=None):
+    sns.set()
 
     # get a graphs
     try:
@@ -212,48 +217,95 @@ def evaluate(cmds, trainer_spec: ModelSpecs,
         print("No graph file found.")
         return
 
-    # x_df = pd.DataFrame(x_np)
-    # x_np = x.numpy()
     last_saved_epoch = trainer_spec.get_last_saved_epoc()['node_model']
     validate_set = saved_in_test[0:int(0.2 * graph_test_len)]
     test_set = saved_in_test[int(0.8 * graph_test_len):]
 
     compute_generic_stats(test_set)
+    if last_epoch_only:
+        predictions = trainer_spec.get_prediction_graph(is_last=last_epoch_only)
+    else:
+        predictions = trainer_spec.get_prediction_graph()
+
+    mmd_degree_predict = []
+    mmd_degrees_validates = []
+    mmd_clustering_predict = []
+    mmd_clustering_validate = []
+    mmd_orbits_predict = []
+    mmd_orbits_validate = []
+
+    compute_generic_stats(test_set)
     fmt_print("Last saved epoch", last_saved_epoch)
-    predictions = trainer_spec.get_prediction_graph()
-    for i, (file_name, epoch_predicted) in enumerate(predictions):
+
+    for i, (epoch, sample_time, file_name, epoch_predicted) in enumerate(predictions):
         if i < last_saved_epoch:
             continue
-        fmtl_print("Processing {}".format(i), file_name)
+
+        fmtl_print("Processing epoch {} sample {} file_name {}".format(i, epoch, sample_time), file_name)
 
         #
         compute_generic_stats(epoch_predicted)
         compute_generic_stats(validate_set)
         select_graph(test_set, epoch_predicted)
 
+        indices = np.random.randint(low=0, high=len(epoch_predicted), size=(20,))
+        predication_selection = []
+        for (p, j) in enumerate(indices):
+            predication_selection.append(epoch_predicted[j])
+
+        # evaluate mmd test, between prediction and test
         # evaluate mmd test, between prediction and test
         mmd_degree = -1
         if trainer_spec.mmd_degree():
-            mmd_degree = degree_stats(test_set, epoch_predicted)
+            mmd_degree = degree_stats(test_set, predication_selection)
             mmd_degree_validate = degree_stats(test_set, validate_set)
-            fmt_print('Train/Generated MMD', mmd_degree)
-            fmt_print('Train/Validation MMD', mmd_degree_validate)
+            fmt_print('Degree train/Generated MMD', mmd_degree)
+            fmt_print('Degree train/Validation MMD', mmd_degree_validate)
+            mmd_degree_predict.append(mmd_degree.copy())
+            mmd_degrees_validates.append(mmd_degree_validate.copy())
+        #
+        mmd_clustering = -1
+        if trainer_spec.mmd_clustering():
+            mmd_clustering_a = clustering_stats(test_set, predication_selection)
+            mmd_clustering_b = clustering_stats(test_set, validate_set)
+            fmt_print('Clustering train/Generated MMD', mmd_clustering_a)
+            fmt_print('Clustering train/Validation MMD', mmd_clustering_b)
+            mmd_clustering_predict.append(mmd_clustering_a.copy())
+            mmd_clustering_validate.append(mmd_clustering_b.copy())
 
-        # #
-        # mmd_clustering = -1
-        # if trainer_spec.mmd_clustering():
-        #     mmd_clustering = clustering_stats(graph_in_test, epoch_predicted)
-        #     fmt_print('Graph clustering', mmd_clustering)
-        # #
-        # mmd_4orbits = -1
-        # if trainer_spec.mmd_orbits():
-        #     mmd_orbits = orbit_stats_all(graph_in_test, epoch_predicted)
-        #     fmt_print('Graph orbit', mmd_4orbits)
+        list_of_tuples = list(
+            zip(mmd_degree_predict, mmd_degrees_validates, mmd_clustering_predict,
+                mmd_clustering_validate))
+        # print(list_of_tuples)
+        df = pd.DataFrame(list_of_tuples, columns=['pdegree',
+                                                   'vdegree',
+                                                   'pcluster',
+                                                   'vcluster'])
 
-        # x_np = [i] = [mmd_degree, mmd_clustering, mmd_orbits]
-        #print('degree', mmd_degree, 'clustering', mmd_clustering, 'orbits', mmd_4orbits)
+        ts = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+        if default_loc is None:
+            df.to_csv('eval_stats' + ts + '.csv')
+        else:
+            _path = Path(default_loc) / 'eval_stats'
+            df.to_csv(_path + ts + '.csv')
 
-    # x_df.to_csv('tmp.csv')
+        return df
+
+
+def evaluate(cmds, trainer_spec: ModelSpecs,
+             last_epoch_only=False,
+             default_loc=None):
+    frame = evaluate_prediction(trainer_spec,
+                                last_epoch_only=last_epoch_only,
+                                default_loc=default_loc)
+    df = frame.astype(float)
+    # df.plot(kind='line', x='vdegree', y='pdegree', ax=ax)
+    plt.style.use('ggplot')
+    x1 = pd.Series(df['pdegree'], name='pred_degree')
+    x2 = pd.Series(df['vdegree'], name='val_degree')
+
+    sns.pairplot(df, x_vars=None, y_vars=["vdegree", "pdegree"],
+                 )
 
 
 def main_train(cmds, trainer_spec: ModelSpecs):
