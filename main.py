@@ -315,7 +315,7 @@ def evaluate(cmds, trainer_spec: ModelSpecs,
 
     sns.pairplot(df,
                  x_vars="epoch",
-                 y_vars=["vdegree", "pdegree"],)
+                 y_vars=["vdegree", "pdegree"],).figure.savefig("output.png")
 
 
 def main_train(cmds, trainer_spec: ModelSpecs):
@@ -414,16 +414,6 @@ def main(cmds, trainer_spec: ModelSpecs):
             sys.exit("Check configuration file,  it looks like model {} "
                      "is untrained.".format(trainer_spec.get_active_model))
         evaluate(cmds, trainer_spec)
-
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 if __name__ == '__main__':
