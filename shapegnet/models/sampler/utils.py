@@ -2,27 +2,6 @@ import networkx as nx
 import numpy as np
 
 
-def preprocess(A):
-    # Get size of the adjacency matrix
-    size = len(A)
-    # Get the degrees for each node
-    degrees = np.sum(A, axis=1) + 1
-
-    # Create diagonal matrix D from the degrees of the nodes
-    D = np.diag(np.power(degrees, -0.5).flatten())
-    # Cholesky decomposition of D
-    # D = np.linalg.cholesky(D)
-    # Inverse of the Cholesky decomposition of D
-    # D = np.linalg.inv(D)
-    # Create an identity matrix of size x size
-    I = np.eye(size)
-    # Create A hat
-    A_hat = A + I
-    # Return A_hat
-    A_normal = np.dot(np.dot(D, A_hat), D)
-    return A_normal
-
-
 def bfs_paths(input_graph, start_id):
     """
     Get a bfs node id sequence from some start_id
@@ -45,3 +24,24 @@ def bfs_paths(input_graph, start_id):
         start = frontier
 
     return output
+
+
+def preprocess(A):
+    # Get size of the adjacency matrix
+    size = len(A)
+    # Get the degrees for each node
+    degrees = np.sum(A, axis=1) + 1
+
+    # Create diagonal matrix D from the degrees of the nodes
+    D = np.diag(np.power(degrees, -0.5).flatten())
+    # Cholesky decomposition of D
+    # D = np.linalg.cholesky(D)
+    # Inverse of the Cholesky decomposition of D
+    # D = np.linalg.inv(D)
+    # Create an identity matrix of size x size
+    I = np.eye(size)
+    # Create A hat
+    A_hat = A + I
+    # Return A_hat
+    A_normal = np.dot(np.dot(D, A_hat), D)
+    return A_normal

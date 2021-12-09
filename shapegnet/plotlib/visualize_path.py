@@ -7,40 +7,14 @@ import pylab as plt
 from IPython.core.display import HTML, display, Image
 
 
-def bfs_seq(input_graph, start_id):
-    """
-     Get a bfs node sequence.
-
-    :param input_graph:
-    :param start_id:
-    :return:
-    """
-    dictionary = dict(nx.bfs_successors(input_graph, start_id))
-    start = [start_id]
-    output = [start_id]
-
-    while len(start) > 0:
-        frontier = []
-        while len(start) > 0:
-            current = start.pop(0)
-            neighbor = dictionary.get(current)
-            if neighbor is not None:
-                frontier = frontier + neighbor
-
-        output = output + frontier
-        start = frontier
-
-    # print("start", start_id)
-    # print("output", len(output))
-
-    return output
-
-
 # import pygraphviz
 # from networkx.drawing.nx_agraph import graphviz_layout
 
 # It seems like these structures can keep "garbage" fro
 # previous runs, so we must clean them out before using:
+from shapegnet.models.sampler.utils import bfs_paths
+
+
 def gc(queue):
     if not queue.empty():
         while not queue.empty():
@@ -180,9 +154,9 @@ def showGraph(G, start, goal, paths=[], node_labels='default',
         """
         edges = list(zip(path[:-1], path[1:]))
 
-        #print(type(Gr[z[0]][z[1])
+        # print(type(Gr[z[0]][z[1])
 
-        #cost = sum([Gr[z[0]][z[1]]['weight'] for z in edges])
+        # cost = sum([Gr[z[0]][z[1]]['weight'] for z in edges])
 
         if not digraph:
             edges += list(zip(path[1:], path[:-1]))
@@ -371,7 +345,7 @@ def ucs(G, start, goal, trace=False):
 # print(nx.bfs_successors(ToyGraph, 1))
 # paths = bfs_seq(nx.barbell_graph(4, 4), 3)
 g = nx.ladder_graph(4)
-paths = bfs_seq(g, 0)
+paths = bfs_paths(g, 0)
 
 for path in paths:
     showGraph(g, 0, path, paths=['bfs'], gsize=(4, 4))
