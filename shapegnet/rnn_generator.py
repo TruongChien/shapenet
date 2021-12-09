@@ -440,9 +440,10 @@ class RnnGenerator(GeneratorTrainer):
 
     def save_ifneed(self, epoch, last_epoch=False):
         """
-        Saves model checkpoint, when based on template settings.
-        :param last_epoch:
-        :param epoch:  current epoch
+         Saves model checkpoint, when based on template settings.
+
+        :param last_epoch:  if it last_epoch we always save.
+        :param epoch: current epoch
         :return: True if saved
         """
         if self.trainer_spec.save() or last_epoch is True:

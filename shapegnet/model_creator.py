@@ -182,4 +182,7 @@ class ModelCreator:
         model_attr = self.trainer_spec.model['node_model']
         model_name = model_attr['model']
         generator = self.trainer_dispatch[model_name]
-        return generator(self.trainer_spec, models, dataset_loader, decoder, device=self.device, verbose=True)
+        return generator(self.trainer_spec, models,
+                         dataset_loader,
+                         decoder,
+                         device=self.device, verbose=self.verbose)
