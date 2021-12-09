@@ -22,33 +22,14 @@ def preprocess(A):
     A_normal = np.dot(np.dot(D, A_hat), D)
     return A_normal
 
-#
-# def BFS(self, g, start):
-#     v = v
-#     e = e
-#
-#     visited = [False] * self.v
-#     q = [start]
-#     visited[start] = True
-#
-#     while q:
-#         vis = q[0]
-#         print(vis, end=' ')
-#         q.pop(0)
-#
-#         for i in range(self.v):
-#             if (g.adj[vis][i] == 1 and (not visited[i])):
-#                 q.append(i)
-#                 visited[i] = True
-
 
 def bfs_paths(input_graph, start_id):
     """
-     Get a bfs node sequence.
+    Get a bfs node id sequence from some start_id
 
-    :param input_graph:
-    :param start_id:
-    :return:
+    :param input_graph: networkx graph
+    :param start_id: node id
+    :return: BFS order.
     """
     dictionary = dict(nx.bfs_successors(input_graph, start_id))
     start = [start_id]
@@ -62,8 +43,5 @@ def bfs_paths(input_graph, start_id):
                 frontier = frontier + neighbor
         output = output + frontier
         start = frontier
-
-    # print("start", start_id)
-    # print("output", len(output))
 
     return output
