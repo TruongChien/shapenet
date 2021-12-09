@@ -1001,35 +1001,36 @@ class ModelSpecs:
                 return int(t['sample_time'])
         return 0
 
-    def momentum(self) -> float:
+    def momentum(self, alias_name) -> float:
         """
-        :return:  moment factor, default 0
+        Moment factor, default 0
+        @param alias_name:
+        @return: moment factor, default 0
         """
-        if 'optimizer' in self.config:
-            t = self.config['optimizer']
-            if 'momentum' in t:
-                return bool(t['momentum'])
+        opt = self.get_optimizer(alias_name)
+        if 'momentum' in opt:
+            return float(opt['momentum'])
+
         return float(0)
 
-    def dampening(self) -> float:
+    def dampening(self, alias_name) -> float:
         """
         :return: Dampening for momentum, default 0
         """
-        if 'optimizer' in self.config:
-            t = self.config['optimizer']
-            if 'dampening' in t:
-                return bool(t['dampening'])
+        opt = self.get_optimizer(alias_name)
+        if 'dampening' in opt:
+            return float(opt['dampening'])
         return float(0)
 
-    def nesterov(self) -> bool:
+    def nesterov(self, alias_name) -> bool:
         """
         Nesterov momentum,
         Default False
         """
-        if 'optimizer' in self.config:
-            t = self.config['optimizer']
-            if 'nesterov' in t:
-                return bool(t['nesterov'])
+        opt = self.get_optimizer(alias_name)
+        if 'nesterov' in opt:
+            return bool(opt['nesterov'])
+
         return False
 
     def get_model_lr_scheduler(self, model_name) -> str:

@@ -110,7 +110,7 @@ class RnnGenerator(GeneratorTrainer):
             print(trainer_spec.model)
 
     def __call__(self):
-        return f"{self.name} called"
+        raise Exception("unsupported")
 
     def create_optimizer(self, net, alias_name: str):
         """
@@ -187,11 +187,10 @@ class RnnGenerator(GeneratorTrainer):
         return scheduler
 
     @torch.no_grad()
-    def model_prediction(self, is_traced=True, batch_size=16):
+    def model_prediction(self):
         """
-
-        :param is_traced:
-        :param batch_size:
+        Model Prediction,  Generate graph prediction
+        and saves each prediction as graph file.
         :return:
         """
         batch_size = self.trainer_spec.test_batch_size()
@@ -442,7 +441,7 @@ class RnnGenerator(GeneratorTrainer):
         """
          Saves model checkpoint, when based on template settings.
 
-        :param last_epoch:  if it last_epoch we always save.
+        :param last_epoch: if it last_epoch we always save.
         :param epoch: current epoch
         :return: True if saved
         """
@@ -590,7 +589,7 @@ class RnnGenerator(GeneratorTrainer):
 
         for epoch in tqdm_iter:
 
-            #self.plot_example(epoch)
+            # self.plot_example(epoch)
             time_start = time.monotonic()
             total_epoch_loss = self.train_epoch(epoch)
             tqdm_iter.set_postfix({'total_epoch_loss': total_epoch_loss})
