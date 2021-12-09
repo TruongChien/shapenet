@@ -6,6 +6,8 @@ import networkx as nx
 import numpy as np
 from colorama import Fore, Style
 
+from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats
+
 
 def fmtl_print(left, *argv):
     """
@@ -255,6 +257,18 @@ def load_graph_prediction(graph_list, is_real=True):
     return graph_list
 
 
+def basic_graph_stats(real_g_list, target_g_list):
+    """
+
+    @param real_g_list:
+    @param target_g_list:
+    @return:
+    """
+    dist_degree = degree_stats(real_g_list, target_g_list)
+    dist_clustering = clustering_stats(real_g_list, target_g_list)
+    return dist_degree, dist_clustering
+
+
 def find_nearest(array, value):
     """
 
@@ -262,8 +276,7 @@ def find_nearest(array, value):
     @param value:
     @return:
     """
-    idx = (np.abs(array - value)).argmin()
-    return idx
+    return (np.abs(array - value)).argmin()
 
 
 def export_graphs_to_txt(graph_list, output_filename_prefix):
