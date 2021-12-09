@@ -187,7 +187,7 @@ class RnnGenerator(GeneratorTrainer):
         return scheduler
 
     @torch.no_grad()
-    def model_prediction(self):
+    def model_prediction(self, epoch):
         """
         Model Prediction,  Generate graph prediction
         and saves each prediction as graph file.
