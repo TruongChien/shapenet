@@ -187,7 +187,7 @@ class RnnGenerator(GeneratorTrainer):
         return scheduler
 
     @torch.no_grad()
-    def model_prediction(self, epoch):
+    def model_prediction(self):
         """
         Model Prediction,  Generate graph prediction
         and saves each prediction as graph file.
@@ -493,7 +493,7 @@ class RnnGenerator(GeneratorTrainer):
             predictions = []
             while len(predictions) < self.trainer_spec.test_total_size():
                 # num graphs
-                predictions.extend(self.model_prediction(epoch))
+                predictions.extend(self.model_prediction())
             # save graphs
 
             # plot graph
