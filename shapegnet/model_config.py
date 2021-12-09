@@ -41,16 +41,21 @@ optimizer:
 """
 
 
-def extract_value_from_file(f, key):
+def extract_value_from_file(f, key, file_type='.dat'):
     """
+    @param file_type:
     @param f:
     @param key:
     @return:
     """
-    parsed = f.split('_')
-    for i, k in enumerate(parsed):
+    proceed = f.split('_')
+    for i, k in enumerate(proceed):
         if key in k:
-            return parsed[i + 1]
+            v = proceed[i + 1]
+            if file_type in v:
+                return v[:-len(file_type)]
+            else:
+                return v
 
 
 class ModelSpecs:
@@ -1259,6 +1264,7 @@ class ModelSpecs:
             epoch = extract_value_from_file(f, "epoch")
             sample_time = extract_value_from_file(f, "sample")
             graph_file = self.get_prediction_dir() / Path(f)
+            print(graph_file)
             yield epoch, sample_time, graph_file, graph_from_file(graph_file)
 
     def is_trained(self) -> bool:

@@ -238,10 +238,10 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
     fmt_print("Last saved epoch", last_saved_epoch)
 
     for i, (epoch, sample_time, file_name, epoch_predicted) in enumerate(predictions):
-        if i < last_saved_epoch:
+        if last_epoch_only is True and i < last_saved_epoch:
             continue
 
-        fmtl_print("Processing epoch {} sample {} file_name {}".format(i, epoch, sample_time), file_name)
+        fmtl_print("Processing epoch {} sample {} file_name".format(epoch, sample_time), file_name)
 
         #
         compute_generic_stats(epoch_predicted)
@@ -418,6 +418,8 @@ if __name__ == '__main__':
 
     # parse args and read config.yaml
     cmd = parser.parse_args()
+    print("CMDS", cmd)
+
     training_spec = ModelSpecs()
 
     fmtl_print("Model in training mode", training_spec.is_train_network())
