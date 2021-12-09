@@ -1,3 +1,9 @@
+# ShapeGen
+#
+# Mainly match abstraction simular abstractio for EarlyStopping in tensorflow
+#
+#
+# Author Mustafa Bayramov
 import numpy as np
 import torch
 

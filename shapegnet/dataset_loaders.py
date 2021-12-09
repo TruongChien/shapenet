@@ -1,3 +1,9 @@
+# ShapeGen
+#
+# A dataload utility function.
+#
+#
+# Author Mustafa Bayramov
 import pickle as pkl
 
 import networkx as nx
@@ -14,6 +20,9 @@ import torch
 #     return index
 
 def parse_txt_array(src, sep=None, start=0, end=None, dtype=None, device=None):
+    """
+    Parse point cloud
+    """
     """
     Parse point cloud
     """

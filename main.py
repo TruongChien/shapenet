@@ -1,4 +1,11 @@
-# Model based on GraphRNN
+# ShapeGen
+#
+# This project explores the problem of synthetic graph and mesh generation in
+# auto-regressive and adversarial nets settings.
+#
+# In both cases, my aim to generate realistic graphs and analyze how a model can generalize.
+#
+#
 # Author Mustafa Bayramov
 import argparse
 import random
@@ -22,6 +29,7 @@ from shapegnet.models.sampler.GraphSeqSampler import GraphSeqSampler
 from shapegnet.plotlib import plot
 from shapegnet.plotlib.plot import draw_single_graph
 from shapegnet.utils import fmt_print, fmtl_print
+from colorama import Fore, Style
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

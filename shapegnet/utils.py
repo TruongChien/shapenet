@@ -4,30 +4,42 @@ import re
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from colorama import Fore, Style
 
 
 def fmtl_print(left, *argv):
+    """
+    Format printer helper.
+    @param left:
+    @param argv:
+    @return:
+    """
     if len(argv) == 1:
-        print(f"{str(left) + ':' :<32} {argv[0]}")
+        print(f"{str(left) + ':' + Fore.GREEN :<32} {argv[0]}" + Style.RESET_ALL)
     else:
-        print(f"{str(left) + ':' :<32} {argv}")
+        print(f"{str(left) + ':' + Fore.GREEN :<32} {argv}" + Style.RESET_ALL)
 
 
 def fmt_print(left, *argv):
+    """
+    Format printer helper.
+    @param left:
+    @param argv:
+    @return:
+    """
     if len(argv) == 1:
-        print(f"{str(left) + ':' :<25} {argv[0]}")
+        print(f"{str(left) + ':' + Fore.GREEN :<25} {argv[0]}" + Style.RESET_ALL)
     else:
-        print(f"{str(left) + ':' :<25} {argv}")
+        print(f"{str(left) + ':' + Fore.GREEN :<25} {argv}" + Style.RESET_ALL)
 
 
 def perturb(graph_list, p_del, p_add=None):
-    """ Perturb the list of graphs by adding/removing edges.
-    Args:
-        p_add: probability of adding edges. If None, estimate it according to graph density,
-                such that the expected number of added edges is equal to that of deleted edges.
-        p_del: probability of removing edges
-    Returns:
-        A list of graphs that are perturbed from the original graphs
+    """
+    Perturb the list of graphs by adding/removing edges.
+    @param graph_list:
+    @param p_del:
+    @param p_add:
+    @return:
     """
     perturbed_graph_list = []
     for G_original in graph_list:
@@ -63,15 +75,13 @@ def perturb(graph_list, p_del, p_add=None):
     return perturbed_graph_list
 
 
-def perturb_new(graph_list, p):
-    """ Perturb the list of graphs by adding/removing edges.
-    Args:
-        p_add: probability of adding edges. If None, estimate it according to graph density,
-               such that the expected number of added edges is equal to that of deleted edges.
-        p_del: probability of removing edges
-
-    Returns:
-        A list of graphs that are perturbed from the original graphs
+def fast_petrub(graph_list, p):
+    """
+    Perturb the list of graphs by adding/removing edges.
+    @param graph_list:
+    @param p: probability of adding edges. If None, estimate it according to graph density,
+              such that the expected number of added edges is equal to that of deleted edges
+    @return:
     """
     perturbed_graph_list = []
     for G_original in graph_list:
@@ -95,6 +105,16 @@ def perturb_new(graph_list, p):
 
 def image_buffered(graph, layout='spring', k=1, node_size=55,
                    alpha=1, width=1.3):
+    """
+    Create image buffered IO
+    @param graph:
+    @param layout:
+    @param k:
+    @param node_size:
+    @param alpha:
+    @param width:
+    @return:
+    """
     plt.switch_backend('agg')
     plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
     plt.axis("off")
@@ -137,11 +157,32 @@ def images_buffer_generator(graphs):
         yield img
 
 
-def get_graph(adj):
+def get_graph(adj) -> nx.classes.graph.Graph:
     """
-    get a graph from zero-padded adj
-    :param adj:
-    :return:
+    Returns a nx graph from zero-padded adjacency matrix.
+    @param adj: adjustency matrix
+    [[0. 1. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [1. 0. 0. 1. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [1. 0. 0. 0. 1. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 1. 0. 0. 0. 0. 1. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 1. 1. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 1. 0. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 1. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 0. 1. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 1. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 1. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 1. 1. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 0. 1.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 0. 0.]]
+    @return:
     """
     # remove all zeros rows and columns
     adj = adj[~np.all(adj == 0, axis=1)]
@@ -150,8 +191,12 @@ def get_graph(adj):
     return nx.from_numpy_matrix(adj)
 
 
-# pick the first connected component
 def pick_connected_component(G):
+    """
+    Take first connected node and return subgraph
+    @param G:
+    @return: Sub-graph
+    """
     node_list = nx.node_connected_component(G, 0)
     return G.subgraph(node_list)
 
@@ -176,7 +221,6 @@ def pick_connected_component_new(G, low=1):
 # load a list of graphs
 def load_generated_graphs(graph_list):
     """
-
     """
     for gid in range(len(graph_list)):
         loop_edges = list(nx.selfloop_edges(graph_list[gid]))
@@ -190,8 +234,14 @@ def load_generated_graphs(graph_list):
 # load a list of graphs
 def load_graph_prediction(graph_list, is_real=True):
     """
-
+    Load Graph that ShapeGen generated
+    @param graph_list:
+    @param is_real:
+    @return:
     """
+    if type(graph_list) != list:
+        raise Exception("Graph must be a list")
+
     for i in range(len(graph_list)):
         loop_edges = list(nx.selfloop_edges(graph_list[i]))
         if len(loop_edges) > 0:
@@ -205,27 +255,38 @@ def load_graph_prediction(graph_list, is_real=True):
     return graph_list
 
 
-def export_graphs_to_txt(g_list, output_filename_prefix):
-    i = 0
-    for G in g_list:
+def export_graphs_to_txt(graph_list, output_filename_prefix):
+    """
+
+    @param graph_list:
+    @param output_filename_prefix:
+    @return:
+    """
+
+    if type(graph_list) != list:
+        raise Exception("Graph must be a list")
+
+    for i, G in enumerate(graph_list):
         f = open(output_filename_prefix + '_' + str(i) + '.txt', 'w+')
         for (u, v) in G.edges():
             idx_u = G.nodes().index(u)
             idx_v = G.nodes().index(v)
             f.write(str(idx_u) + '\t' + str(idx_v) + '\n')
-        i += 1
 
 
-def snap_txt_output_to_nx(in_fname):
+def txt_graph_to_nx(file_name):
+    """
+
+    @param file_name:
+    @return:
+    """
     G = nx.Graph()
-    with open(in_fname, 'r') as f:
+    with open(file_name, 'r') as f:
         for line in f:
             if not line[0] == '#':
-                splitted = re.split('[ \t]', line)
-
-                # self loop might be generated, but should be removed
-                u = int(splitted[0])
-                v = int(splitted[1])
+                _splitted = re.split('[ \t]', line)
+                u = int(_splitted[0])
+                v = int(_splitted[1])
                 if not u == v:
                     G.add_edge(int(u), int(v))
     return G
