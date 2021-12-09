@@ -53,5 +53,6 @@ def print_test_two():
     print('MMD prediction', compute_mmd(x, y_pred))
 
 
-print_test_one()
-print_test_two()
+if __name__ == '__main__':
+    print_test_one()
+    print_test_two()
