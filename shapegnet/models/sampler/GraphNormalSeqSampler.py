@@ -36,7 +36,7 @@ class GraphSeqNormalSampler(torch.utils.data.Dataset):
         len_batch = adj_copy.shape[0]
         x_idx = np.random.permutation(adj_copy.shape[0])
         adj_copy = adj_copy[np.ix_(x_idx, x_idx)]
-        adj_encoded = self.encoder.encode(adj_copy.copy(), max_prev_node=self.n - 1)
+        adj_encoded = self.encoder.encode(adj_copy.copy(), depth=self.n - 1)
         # get x and y and adj
         # for small graph the rest are zero padded
         y_batch[0:adj_encoded.shape[0], :] = adj_encoded

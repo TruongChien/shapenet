@@ -16,5 +16,6 @@
 !*.LICENSE
 !*.sh
 !*.ipynb
+!*.yml
 *__pycache__
 /dataset/

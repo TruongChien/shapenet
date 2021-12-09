@@ -42,7 +42,7 @@ def preprocess(A):
 #                 visited[i] = True
 
 
-def bfs_seq(input_graph, start_id):
+def bfs_paths(input_graph, start_id):
     """
      Get a bfs node sequence.
 

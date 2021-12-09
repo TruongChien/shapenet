@@ -3,7 +3,7 @@ import numpy as np
 
 from ..models.adjacency_decoder import AdjacencyDecoder
 from ..models.adjacency_encoder import AdjacencyEncoder
-from ..models.sampler.utils import bfs_seq
+from ..models.sampler.utils import bfs_paths
 
 
 def test_encode_decode_adj():
@@ -25,11 +25,11 @@ def test_encode_decode_adj():
     G = nx.from_numpy_matrix(adj)
     #
     start_idx = np.random.randint(adj.shape[0])
-    x_idx = np.array(bfs_seq(G, start_idx))
+    x_idx = np.array(bfs_paths(G, start_idx))
     adj = adj[np.ix_(x_idx, x_idx)]
 
     print('adj\n', adj)
-    adj_output = encoder.encode(adj, max_prev_node=5)
+    adj_output = encoder.encode(adj, depth=5)
     print('adj_output\n', adj_output)
     adj_recover = decoder.decode(adj_output)
     print('adj_recover\n', adj_recover)

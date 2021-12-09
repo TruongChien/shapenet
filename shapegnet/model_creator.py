@@ -17,10 +17,12 @@ class ModelCreator:
     """
     def __init__(self, trainer_spec: ModelSpecs, device, debug=False, verbose=False):
         """
+         Construct model creator,  it take trainer spec object and
+         create model that indicate as active model.
 
-        :param trainer_spec:
-        :param device:
-        :param verbose:
+        :param trainer_spec: model trainer specification
+        :param device:  device used to train a model.
+        :param verbose:  output verbose data during model creation
         """
         if trainer_spec is None:
             raise Exception("Model spec is nil")
@@ -50,7 +52,7 @@ class ModelCreator:
         GraphRNN: Generating Realistic Graphs with Deep Auto-regressive Models
         """
         models = {}
-        node_rnn = GraphLSTM(self, input_size=trainer_spec.max_prev_node(),
+        node_rnn = GraphLSTM(self, input_size=trainer_spec.depth(),
                              embedding_size=trainer_spec.embedding_size_rnn,
                              hidden_size=trainer_spec.hidden_size_rnn,
                              has_input=True,

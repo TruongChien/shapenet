@@ -111,6 +111,7 @@ def prepare(trainer_spec):
 
 def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     """
+    Create dataset , dataset sampler based on trainer specification.
 
     @param trainer_spec: trainer specification, include strategy how to sample ration etc.
     @param graphs: a graph that we use to train network
@@ -120,8 +121,8 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     # dataset initialization
     if trainer_spec.max_prev_node() > 0:
         dataset = GraphSeqSampler(graphs,
-                                  max_prev_node=trainer_spec.max_prev_node(),
-                                  max_num_node=trainer_spec.max_num_node())
+                                  max_depth=trainer_spec.max_prev_node(),
+                                  max_nodes=trainer_spec.max_num_node())
     else:
         dataset = GraphSeqSampler(graphs)
 

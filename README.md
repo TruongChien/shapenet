@@ -17,11 +17,14 @@ The code has been tested over PyTorch latest version 1.10
  - Check requirement files.
  - 
 ```bash
+conda env create -f environment.yml
+conda activate shapegen
 conda install pytorch torchvision -c pytorch
 ```
 
+We can run code in colab, jupiter or standalone app.
 ```bash
- For Colab you need follow colab noteboot.
+ For Colab you need follow colab notebook.
 ```
 Then install the other dependencies.
 
@@ -29,11 +32,10 @@ Then install the other dependencies.
 pip install -r requirements.txt
 ```
 
-Create config.yaml file
+First create config.yaml file
 
 By default, trainer will create directory indicated in config.yaml file, each model under result
-Both configured in config.yaml Note not all variable syntactically checked. 
-Validation for config.yaml still in TODO not all done so please use existing example.
+Both configured in config.yaml Note not all variable syntactically checked.  Validation for config.yaml still in TODO not all done so please use existing example.
 
 Each experiment create set of directories.  Inside each directory we have generated graph 
 that used for a train a model.  All model files serialized to pickle files.
