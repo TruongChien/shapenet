@@ -928,12 +928,25 @@ class ModelSpecs:
 
     def is_draw_samples(self) -> bool:
         """
-        Draw sample or not.
-        Default: True
+        Check if we need draw sample or not after model trained.
+        @return:
         """
         if 'draw_prediction' in self.config:
             return bool(self.config['draw_prediction'])
+        else:
+            self.config['draw_prediction'] = True
+
         return True
+
+    def set_draw_samples(self, val):
+        """
+        Sets value we need draw sample or not
+        after model trained.
+        """
+        if 'draw_prediction' in self.config:
+            self.config['draw_prediction'] = val
+        else:
+            self.config['draw_prediction'] = val
 
     def betas(self, alias_name, default=False) -> [float, float]:
         """

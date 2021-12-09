@@ -205,6 +205,7 @@ def compute_generic_stats(graph):
 
 
 def evaluate_prediction(trainer_spec: ModelSpecs,
+                        is_verbose=False,
                         last_epoch_only=False,
                         default_loc=None):
     sns.set()
@@ -233,16 +234,20 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
     mmd_clustering_validate = []
     mmd_orbits_predict = []
     mmd_orbits_validate = []
+    epochs = []
 
     compute_generic_stats(test_set)
     fmt_print("Last saved epoch", last_saved_epoch)
 
     for i, (epoch, sample_time, file_name, epoch_predicted) in enumerate(predictions):
+
         if last_epoch_only is True and i < last_saved_epoch:
             continue
 
-        fmtl_print("Processing epoch {} sample {} file_name".format(epoch, sample_time), file_name)
+        if is_verbose is True:
+            fmtl_print("Processing epoch {} sample {} file_name".format(epoch, sample_time), file_name)
 
+        epochs.append(epoch)
         #
         compute_generic_stats(epoch_predicted)
         compute_generic_stats(validate_set)
@@ -254,13 +259,12 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
             predication_selection.append(epoch_predicted[j])
 
         # evaluate mmd test, between prediction and test
-        # evaluate mmd test, between prediction and test
         mmd_degree = -1
         if trainer_spec.mmd_degree():
             mmd_degree = degree_stats(test_set, predication_selection)
             mmd_degree_validate = degree_stats(test_set, validate_set)
-            fmt_print('Degree train/Generated MMD', mmd_degree)
-            fmt_print('Degree train/Validation MMD', mmd_degree_validate)
+            fmtl_print('Degree train/Generated MMD', mmd_degree)
+            fmtl_print('Degree train/Validation MMD', mmd_degree_validate)
             mmd_degree_predict.append(mmd_degree.copy())
             mmd_degrees_validates.append(mmd_degree_validate.copy())
         #
@@ -268,23 +272,26 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
         if trainer_spec.mmd_clustering():
             mmd_clustering_a = clustering_stats(test_set, predication_selection)
             mmd_clustering_b = clustering_stats(test_set, validate_set)
-            fmt_print('Clustering train/Generated MMD', mmd_clustering_a)
-            fmt_print('Clustering train/Validation MMD', mmd_clustering_b)
+            fmtl_print('Clustering train/Generated MMD', mmd_clustering_a)
+            fmtl_print('Clustering train/Validation MMD', mmd_clustering_b)
             mmd_clustering_predict.append(mmd_clustering_a.copy())
             mmd_clustering_validate.append(mmd_clustering_b.copy())
 
         list_of_tuples = list(
-            zip(mmd_degree_predict, mmd_degrees_validates, mmd_clustering_predict,
+            zip(epochs, mmd_degree_predict, mmd_degrees_validates, mmd_clustering_predict,
                 mmd_clustering_validate))
+
         # print(list_of_tuples)
-        df = pd.DataFrame(list_of_tuples, columns=['pdegree',
+        df = pd.DataFrame(list_of_tuples, columns=['epoch',
+                                                   'pdegree',
                                                    'vdegree',
                                                    'pcluster',
                                                    'vcluster'])
 
         ts = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if default_loc is None:
-            df.to_csv('eval_stats' + ts + '.csv')
+            file_name = 'eval_stats' + ts + '.csv'
+            df.to_csv(file_name)
         else:
             _path = Path(default_loc) / 'eval_stats'
             df.to_csv(_path + ts + '.csv')
@@ -300,12 +307,15 @@ def evaluate(cmds, trainer_spec: ModelSpecs,
                                 default_loc=default_loc)
     df = frame.astype(float)
     # df.plot(kind='line', x='vdegree', y='pdegree', ax=ax)
+
     plt.style.use('ggplot')
+
     x1 = pd.Series(df['pdegree'], name='pred_degree')
     x2 = pd.Series(df['vdegree'], name='val_degree')
 
-    sns.pairplot(df, x_vars=None, y_vars=["vdegree", "pdegree"],
-                 )
+    sns.pairplot(df,
+                 x_vars="epoch",
+                 y_vars=["vdegree", "pdegree"],)
 
 
 def main_train(cmds, trainer_spec: ModelSpecs):
@@ -354,8 +364,9 @@ def main_train(cmds, trainer_spec: ModelSpecs):
     GeneratorTrainer.save_graphs(graphs, str(trainer_spec.test_graph_file()))
 
     # plot training set if needed
-    if cmds.plot == 'train':
-        plot.draw_samples_from_file(trainer_spec.train_graph_file(), plot_type='train',
+    if cmds is not None and cmds.plot_training:
+        plot.draw_samples_from_file(trainer_spec.train_graph_file(),
+                                    plot_type='train',
                                     file_prefix=trainer_spec.train_plot_filename(),
                                     num_samples=10)
 
@@ -404,6 +415,16 @@ def main(cmds, trainer_spec: ModelSpecs):
                      "is untrained.".format(trainer_spec.get_active_model))
         evaluate(cmds, trainer_spec)
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 if __name__ == '__main__':
     """
@@ -411,25 +432,29 @@ if __name__ == '__main__':
     fmtl_print("Torch cudnn backend version: ", torch.backends.cudnn.version())
     parser = argparse.ArgumentParser(description="Trains a graph generator models.")
     parser.add_argument("--device", default="cuda", help="[cpu,cuda]")
-    parser.add_argument("--plot", default="none", help="plot train or test set")
-    parser.add_argument("--hidden_size", default=100, type=int, help="number of hidden units in each flow layer", )
+    parser.add_argument("--no_plot", default=False, type=bool, help="Disables plot after model trained.")
+    parser.add_argument("--verbose", default=False, type=bool, help="Enables verbose output.")
+    parser.add_argument("--train", default=False, type=bool, help="Train a network.")
+    parser.add_argument("--plot_training", default=False, type=bool, help="Enable plotting example from train set.")
+
     parser.add_argument("--n_epochs", default=50, type=int, help="number of training epochs")
     parser.add_argument("--n_samples", default=30000, type=int, help="total number of data points in toy dataset", )
 
     # parse args and read config.yaml
     cmd = parser.parse_args()
-    print("CMDS", cmd)
-
     training_spec = ModelSpecs()
+    if 'no_plot' in cmd and cmd.no_plot is True:
+        training_spec.set_draw_samples(False)
 
-    fmtl_print("Model in training mode", training_spec.is_train_network())
-    fmtl_print("Model in evaluate mode", training_spec.is_evaluate())
-    fmtl_print("Model in generate sample", training_spec.is_draw_samples())
-    fmtl_print("Model active dataset", training_spec.active)
-    fmtl_print("Model active dataset", training_spec.epochs())
-    fmtl_print("Model active dataset", training_spec.batch_size())
-    fmtl_print("Model number of layers", training_spec.num_layers())
-    fmtl_print("Active model", training_spec.active_model)
+    if cmd.verbose:
+        fmtl_print("Model in training mode", training_spec.is_train_network())
+        fmtl_print("Model in evaluate mode", training_spec.is_evaluate())
+        fmtl_print("Model in generate sample", training_spec.is_draw_samples())
+        fmtl_print("Model active dataset", training_spec.active)
+        fmtl_print("Model active dataset", training_spec.epochs())
+        fmtl_print("Model active dataset", training_spec.batch_size())
+        fmtl_print("Model number of layers", training_spec.num_layers())
+        fmtl_print("Active model", training_spec.active_model)
 
     # run
     main(cmd, training_spec)
