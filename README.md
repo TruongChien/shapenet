@@ -1,5 +1,7 @@
 # ShapeGen A Graph Generative models
 
+![alt text](https://miro.medium.com/max/1875/1*B_CulvZLSmhbQ8L_byrJDA.jpeg)
+
 In this project, I explored mainly two ideas, autoregressive and adversarial models. 
 So the core of my project is to apply and explore the generative models for Graph Generation. 
 In autoregressive settings and adversarial settings in real-world scenarios, where the graph 
