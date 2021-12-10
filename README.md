@@ -20,11 +20,7 @@ generation is either auto-regressive generation or min-max game.
 , [Jure Leskovec](https://cs.stanford.edu/people/jure/index.html)
 , [GraphRNN: Generating Realistic Graphs with Deep Auto-regressive Model](https://arxiv.org/abs/1802.08773) (ICML 2018)
 
-[NetGan] https://arxiv.org/abs/1803.00816
-[Aleksandar Bojchevski] (https://arxiv.org/search/stat?searchtype=author&query=Bojchevski%2C+A),
-[Oleksandr Shchur] (https://arxiv.org/search/stat?searchtype=author&query=Shchur%2C+O)
-[Daniel Zügner] (https://arxiv.org/search/stat?searchtype=author&query=Z%C3%BCgner%2C+D)
-[Stephan Günnemann] (https://arxiv.org/search/stat?searchtype=author&query=G%C3%BCnnemann%2C+S)
+[NetGan] (https://arxiv.org/abs/1803.00816) [Aleksandar Bojchevski], [Oleksandr Shchur] [Daniel Zügner],[Stephan Günnemann]
 
 This repository is the PyTorch implementation. 
 
