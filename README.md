@@ -1,14 +1,28 @@
 # ShapeGen A Graph Generative models
 
-This repository is the PyTorch implementation of graph generative models. 
+In this project, I explored mainly two ideas, autoregressive and adversarial models. 
+So the core of my project is to apply and explore the generative models for Graph Generation. 
+In autoregressive settings and adversarial settings in real-world scenarios, where the graph 
+generation is either auto-regressive generation or min-max game. 
+
+[Stanford cs224w](https://web.stanford.edu/class/cs224w/)
+[Stanford cs236] (https://deepgenerativemodels.github.io/)
+[Jure Leskovec](https://cs.stanford.edu/people/jure/index.html)
+
 - GraphRNN a graph generative model using auto-regressive.
 - NetGan and Customer implementation of NetGan.
-- Custom GraphRNN ongoing work on improvement.
+- Custom GraphRNN ongoing work. (Specifically goal to improve generation and training speed) improvement)
 
 [Jiaxuan You](https://cs.stanford.edu/~jiaxuan/)\*, [Rex Ying](https://cs.stanford.edu/people/rexy/)\*
 , [Xiang Ren](http://www-bcf.usc.edu/~xiangren/), [William L. Hamilton](https://stanford.edu/~wleif/)
 , [Jure Leskovec](https://cs.stanford.edu/people/jure/index.html)
 , [GraphRNN: Generating Realistic Graphs with Deep Auto-regressive Model](https://arxiv.org/abs/1802.08773) (ICML 2018)
+
+This repository is the PyTorch implementation. 
+
+###
+
+[more details here] (https://medium.com/@spyroot/shapegen-gran-generation-955d5b78e6d8)
 
 ## Installation
 

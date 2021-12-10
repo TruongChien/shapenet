@@ -86,6 +86,7 @@ def compute_graph_split_len(gv, gt):
     """
     Compute split based on number of nodes and edges
     and return normalized value.
+
     @param gv:
     @param gt:
     @return:
