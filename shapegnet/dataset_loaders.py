@@ -1,6 +1,6 @@
 # ShapeGen
 #
-# A dataload utility function.
+# A dataset loader and utilities function.
 #
 #
 # Author Mustafa Bayramov

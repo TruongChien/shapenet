@@ -5,9 +5,9 @@ class AdjacencyFlexEncoder:
     """
 
     """
-    def __init__(self, max_prev_node=10, device='cpu'):
+    def __init__(self, depth=10, device='cuda'):
         self.device = device
-        self.max_prev_node = max_prev_node
+        self.max_prev_node = depth
 
     @staticmethod
     def encode(adj):

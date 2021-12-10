@@ -5,9 +5,9 @@ class AdjacencyEncoder:
     """
 
     """
-    def __init__(self, max_prev_node=10, device='cpu'):
+    def __init__(self, depth=10, device='gpu'):
         self.device = device
-        self.max_prev_node = max_prev_node
+        self.depth = depth
 
     def encode(self, adj, depth=10, is_full=False):
         """
@@ -19,7 +19,7 @@ class AdjacencyEncoder:
         :return:
         """
         if is_full:
-            self.max_prev_node = adj.shape[0] - 1
+            self.depth = adj.shape[0] - 1
 
         # pick up lower tri
         adj = np.tril(adj, k=-1)

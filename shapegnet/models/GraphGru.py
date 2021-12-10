@@ -1,3 +1,9 @@
+# Graph Generator GRU Model
+#
+# This GraphRNN GRU implementation.
+# https://arxiv.org/abs/1802.08773
+#
+# Mustafa B
 from __future__ import unicode_literals, print_function, division
 import torch
 import torch.nn as nn
@@ -7,26 +13,17 @@ from rich.console import Console
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
-pretty.install()
 
-
-# plain GRU model
+# We use two GRU for GraphRNN.
 class GraphGRU(nn.Module):
     """
 
     """
     def __init__(self, input_size, batch_size, embedding_size, hidden_size, num_layers,
                  has_input=True, has_output=False,
-                 output_size=None, bidirectional=False, device='cpu', verbose=False):
+                 output_size=None, bidirectional=False, device='cuda', verbose=False):
         """
-
         """
-
-        if verbose:
-            self.console = Console(width=128)
-            style = "bold white on blue"
-            self.console.print(locals())
-
         super(GraphGRU, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size

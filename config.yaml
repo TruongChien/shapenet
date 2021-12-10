@@ -1,18 +1,18 @@
 train: True                 # train or not,  default is True for generation we only need load pre-trained model
-active: 'grid_min'          # dataset set generated.
+active: 'grid_small'        # dataset set generated.
 use_model: 'GraphGruRnn'    # model to use , it must be defined in models section.
 draw_prediction: True       # at the of training draw.  (TODO here now it will draw last epocs)
 load_model: True            # load model or not, and what
 load_epoch: 500             # load model.  last epoch
 save_model: True            # save model,
 regenerate: True            # regenerated,  factor when indicated by epochs_save
-active_setting: mini        # indicate what setting to use, so we can switch from debug to production
+active_setting: baseline    # indicate what setting to use, so we can switch from debug to production
 evaluate: True              # will run evaluation
 
 early_stopping:
   monitor: loss
   min_delta:
-  patience: 100
+  patience: 1000
   mode: max
 
 settings:
@@ -130,11 +130,24 @@ trace_training_timer: True
 trace_epocs: 1
 
 graph:
-   # multiplied (640x10 and 15x32)
-
+  # multiplied (640x10 and 15x32)
   # Generated Grid
+  hex_lattice:
+    epochs: 500
+    parameter_shrink: 2
+    batch_size: 32
+    test_batch_size: 32
+    test_total_size: 1000
+    num_layers: 4
+    lr: 0.003
+    milestones: [ 400, 1000 ]
+    lr_rate: 0.3
+    graph_spec:
+      hex_m: 4
+      hex_n: 4
+    max_num_node: 16
+    max_prev_node: 9
   grid:
-    # https://networkx.org/documentation/stable/reference/generated/networkx.generators.lattice.grid_2d_graph.html
     epochs: 100
     parameter_shrink: 1
     batch_size: 32
@@ -147,8 +160,6 @@ graph:
     graph_spec:
       grid_n: [ 10, 20 ]
       grid_m: [ 10, 20 ]
-    max_num_node: 0
-    max_prev_node: 40
   # this small grid. just to test code end to end
   grid_min:
     epochs: 20
@@ -163,10 +174,8 @@ graph:
     graph_spec:
       grid_n: [ 2, 5 ]
       grid_m: [ 2, 6 ]
-    max_num_node: 0
-    max_prev_node: 0
   grid_small:
-    epochs: 500
+    epochs: 2000
     parameter_shrink: 2
     batch_size: 32
     test_batch_size: 32
@@ -178,8 +187,6 @@ graph:
     graph_spec:
       grid_n: [ 2, 5 ]
       grid_m: [ 2, 6 ]
-#    max_num_node: 10
-    max_prev_node: 15
   # Generated Community
   caveman:
     epochs: 20
@@ -232,4 +239,4 @@ timing_dir: "timing"
 figures_dir: "figures"
 prediction_dir: "prediction"                    # where we save prediction
 model_save_dir: "model_save"                    # where we save model
-#figures_prediction_dir: "prediction_figures"    #
+#figures_prediction_dir: "prediction_figures"   #

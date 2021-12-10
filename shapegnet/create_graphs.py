@@ -14,6 +14,7 @@ def dataset_graph_generator():
         'grid_small':    generate_grid,
         'grid_big':      generate_grid,
         'grid_min':      generate_grid,
+        'hex_lattice':   generate_hexagonal_lattice,
         'caveman':       generate_caveman,
         'caveman_small': generate_caveman,
         'caveman_big':   generate_caveman,
@@ -25,6 +26,33 @@ def gracefully_exit(msg):
     """
     print(msg)
     sys.exit()
+
+
+def generate_hexagonal_lattice(specs: ModelSpecs, m=2, n=2):
+
+    if specs.is_graph_creator_verbose():
+        fmt_print("Generating grid graph type", "backend nx")
+
+    graph_spec = specs.graph_specs['graph_spec']
+    if 'hex_m' not in graph_spec:
+        gracefully_exit("Grid graph must contain hex_m")
+        sys.exit()
+    if 'hex_n' not in graph_spec:
+        gracefully_exit("Grid graph must contain hex_n")
+        sys.exit()
+
+    grid_n = graph_spec['hex_m']
+    grid_m = graph_spec['hex_n']
+
+    if specs.is_graph_creator_verbose():
+        fmt_print("Synthetic grid's n and m", grid_n, grid_m)
+
+    graphs = []
+    for i in range(0, 5):
+        graphs.append(nx.hexagonal_lattice_graph(m, n))
+
+    # specs.set_depth(10)
+    return graphs
 
 
 def generate_grid(specs: ModelSpecs):
@@ -87,12 +115,12 @@ def citeseer(radius=1, min_nodes=4, max_nodes=20, split=200, is_shuffled=True):
 
 def ladder_graph(start_range, stop_range):
     """
-
     """
     print("Creating ladder graph..")
     graphs = []
     for i in range(start_range, stop_range):
         graphs.append(nx.ladder_graph(i))
+
     return 10, graphs
 
 

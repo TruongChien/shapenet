@@ -40,11 +40,9 @@ class GraphSeqSampler(torch.utils.data.Dataset):
 
         if max_nodes is None or max_nodes == 0:
             self.n = max(self.len_all)
-            print("COMPUTED DEPTH", self.n)
 
-        if max_depth is None or max_nodes == 0:
-            self.depth = max(self.max_depth())
-            print("COMPUTED DEPTH", self.depth)
+        if max_depth is None or max_depth == 0:
+            self.depth = max(self.compute_max_depth())
 
         if self.sorted:
             self.depth = max_depth
@@ -52,10 +50,22 @@ class GraphSeqSampler(torch.utils.data.Dataset):
             self.len_all = [self.len_all[i] for i in len_batch_order]
             self.A = [self.A[i] for i in len_batch_order]
 
-        self.encoder = AdjacencyEncoder()
-        self.base_encoder = AdjacencyFlexEncoder(max_prev_node=self.depth)
+        self.encoder = AdjacencyEncoder(depth=self.depth)
+        self.base_encoder = AdjacencyFlexEncoder(depth=self.depth)
 
     def __len__(self):
+        """
+
+        @return:
+        """
+        if self.depth is None or self.depth == 0:
+            self.n = max(self.len_all)
+            print("Len COMPUTED MAX NODE DEPTH", self.n)
+
+        if self.depth is None or self.depth == 0:
+            self.depth = max(self.compute_max_depth())
+            print("Len COMPUTED MAX DEPTH", self.depth)
+
         return len(self.A)
 
     def __getitem__(self, idx):
@@ -63,6 +73,14 @@ class GraphSeqSampler(torch.utils.data.Dataset):
          Return training batch
          @return: x, y and len batch as dict 'x', 'y', 'len'
         """
+        if self.n is None or self.n == 0:
+            self.n = max(self.len_all)
+            print("Get Item COMPUTED MAX NODE DEPTH", self.n)
+
+        if self.depth is None or self.depth == 0:
+            self.depth = max(self.compute_max_depth())
+            print("Get Item COMPUTED MAX DEPTH", self.depth)
+
         A = self.A[idx].copy()
 
         # pad
@@ -93,7 +111,7 @@ class GraphSeqSampler(torch.utils.data.Dataset):
         x_batch[1:A_encoded.shape[0] + 1, :] = A_encoded
         return {'x': x_batch, 'y': y_batch, 'len': batch_len}
 
-    def max_depth(self):
+    def compute_max_depth(self):
         """
         Computes max depth for input graph.
         @return:

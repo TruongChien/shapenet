@@ -1,6 +1,7 @@
 # Model RNN Trainer class
 #
-# Responsible for training RNN model such as GraphRNN.
+# A GraphRNN trainer, it mainly
+# responsible for training RNN model such as GraphRNN.
 #
 # Mustafa
 import time
@@ -29,9 +30,9 @@ from .utils import get_graph, fmt_print, fmtl_print
 
 class RnnGenerator(GeneratorTrainer):
     """
-    Rnn Generator Trainer
+    Rnn Generator Trainer,  It take model specification, a dict that hold
+    a node and edge level RNN network.
     """
-
     def __init__(self, trainer_spec: ModelSpecs,
                  dataset: tutil.data.DataLoader,
                  models: dict,
@@ -250,6 +251,53 @@ class RnnGenerator(GeneratorTrainer):
                 self.trainer_spec.num_layers(),
                 self.trainer_spec.hidden_size_rnn))
 
+    def prepare_data(self, data):
+        """
+
+        :param data:
+        :return:
+        """
+        y_len_unsorted = data['len']
+        y_len_max = max(y_len_unsorted)
+        data_x = data['x'][:, 0:y_len_max, :].float()
+        data_y = data['y'][:, 0:y_len_max, :].float()
+
+        y_len, sort_index = torch.sort(y_len_unsorted, 0, descending=True)
+
+        x = torch.index_select(data_x, 0, sort_index)
+        y = torch.index_select(data_y, 0, sort_index)
+
+        # input, output for output rnn module, list of sequence
+        # lengths of each batch element (must be on the CPU if provided as a tensor).
+        y_reshape = pack_padded_sequence(y, y_len, batch_first=True).data
+        y_idx = torch.flip(torch.arange(y_reshape.size(0),
+                                        requires_grad=False), [0])
+
+        y_reshape = y_reshape.index_select(0, y_idx)
+        y_reshape = y_reshape.view(y_reshape.size(0),
+                                   y_reshape.size(1), 1)
+
+        output_x = torch.cat((torch.ones(y_reshape.size(0), 1, 1),
+                              y_reshape[:, 0:-1, 0:1]), dim=1)
+        output_y = y_reshape
+
+        # batch size for output module: sum(y_len)
+        output_y_len = []
+        output_y_len_bin = np.bincount(np.array(y_len))
+
+        for i in range(len(output_y_len_bin) - 1, 0, -1):
+            count_temp = np.sum(output_y_len_bin[i:])
+            output_y_len.extend([min(i, y.size(2))] * count_temp)
+
+        # pack into variable
+        x = Variable(x).to(self.device)
+        y = Variable(y).to(self.device)
+
+        output_x = Variable(output_x).to(self.device)
+        output_y = Variable(output_y).to(self.device)
+
+        return x, y, output_x, output_y, y_len, output_y_len
+
     def train_epoch(self, epoch):
         """
 
@@ -267,47 +315,12 @@ class RnnGenerator(GeneratorTrainer):
             self.node_rnn.zero_grad()
             self.edge_rnn.zero_grad()
 
-            y_len_unsorted = data['len']
-            y_len_max = max(y_len_unsorted)
-            x_unsorted = data['x'][:, 0:y_len_max, :].float()
-            y_unsorted = data['y'][:, 0:y_len_max, :].float()
+            old_x = data['x']
+            x, y, output_x, output_y, y_len, output_y_len = self.prepare_data(data)
+            self.node_rnn.hidden = self.node_rnn.init_hidden(batch_size=data['x'].float().size(0))
 
             # init according to batch size
-            self.node_rnn.hidden = self.node_rnn.init_hidden(batch_size=x_unsorted.size(0)).to(self.device)
-
-            # sort input
-            y_len, sort_index = torch.sort(y_len_unsorted, 0, descending=True)
-            y_len = y_len.numpy().tolist()
-            x = torch.index_select(x_unsorted, 0, sort_index)
-            y = torch.index_select(y_unsorted, 0, sort_index)
-
-            # input, output for output rnn module
-            y_reshape = pack_padded_sequence(y, y_len, batch_first=True).data
-            y_idx = torch.flip(torch.arange(y_reshape.size(0), requires_grad=False), [0])
-
-            y_reshape = y_reshape.index_select(0, y_idx)
-            y_reshape = y_reshape.view(y_reshape.size(0),
-                                       y_reshape.size(1), 1)
-
-            output_x = torch.cat((torch.ones(y_reshape.size(0), 1, 1), y_reshape[:, 0:-1, 0:1]), dim=1)
-            output_y = y_reshape
-
-            # batch size for output module: sum(y_len)
-            output_y_len = []
-            output_y_len_bin = np.bincount(np.array(y_len))
-
-            # loop_time = time.time()
-            for i in range(len(output_y_len_bin) - 1, 0, -1):
-                # count how many y_len is above i
-                count_temp = np.sum(output_y_len_bin[i:])
-                # put them in output_y_len; max value should not exceed y.size(2)
-                output_y_len.extend([min(i, y.size(2))] * count_temp)
-
-            # pack into variable
-            x = Variable(x).to(self.device)
-            y = Variable(y).to(self.device)
-            output_x = Variable(output_x).to(self.device)
-            output_y = Variable(output_y).to(self.device)
+            self.node_rnn.hidden = self.node_rnn.init_hidden(batch_size=old_x.size(0)).to(self.device)
 
             # if using ground truth to train
             h = self.node_rnn(x, pack=True, input_len=y_len).to(self.device)
@@ -479,14 +492,14 @@ class RnnGenerator(GeneratorTrainer):
         return self.trainer_spec.prediction_filename(epoch, sample_time)
 
     @torch.no_grad()
-    def sample(self, epoch, low_bound=1, upper_bound=4):
+    def sample(self, epoch, low_bound=1, upper_bound=2):
         """
 
         Take samples from prediction and saves graph to a file.
 
-        @param epoch:
-        @param low_bound:
-        @param upper_bound:
+        @param epoch:  current epoch trainer is executing
+        @param low_bound: low bound sample times
+        @param upper_bound: upper bound sample time
         @return:
         """
         for sample_time in range(low_bound, upper_bound):
@@ -515,7 +528,7 @@ class RnnGenerator(GeneratorTrainer):
     def plot_example(self, epoch, example=None):
         """
 
-        Plot a graph as image in tensorboard imagaes.
+        Plot a graph as image in tensorboard images.
 
         :param epoch:
         :param example:

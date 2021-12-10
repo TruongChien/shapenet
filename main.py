@@ -85,13 +85,11 @@ def graph_completion(g, p=0.5):
 def compute_graph_split_len(gv, gt):
     """
     Compute split based on number of nodes and edges
-
     and return normalized value.
     @param gv:
     @param gt:
     @return:
     """
-
     return sum(g.number_of_nodes() for g in gv) / len(gv), \
            sum(g.number_of_nodes() for g in gt) / len(gt)
 
@@ -116,6 +114,8 @@ def generate_train_test(g, specs: ModelSpecs, is_fix_seed=True, is_shuffled=True
 def prepare(trainer_spec):
     """
     Prepare dir , clean up etc.
+    @param trainer_spec:
+    @return:
     """
     trainer_spec.build_dir()
     trainer_spec.setup_tensorflow()
@@ -123,7 +123,7 @@ def prepare(trainer_spec):
 
 def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     """
-    Create dataset , dataset sampler based on trainer specification.
+    Creates dataset , dataset sampler based on trainer specification.
 
     @param trainer_spec: trainer specification, include strategy how to sample ration etc.
     @param graphs: a graph that we use to train network.
@@ -135,6 +135,8 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
         dataset = GraphSeqSampler(graphs,
                                   max_depth=trainer_spec.max_depth(),
                                   max_nodes=trainer_spec.max_nodes())
+        trainer_spec.set_depth(dataset.depth)
+        trainer_spec.set_max_num_node(dataset.n)
     else:
         dataset = GraphSeqSampler(graphs)
 
@@ -191,7 +193,7 @@ def select_graph(real_graph, generated_graph, is_shuffle=True):
 
 def compute_generic_stats(graph):
     """
-    Compute generic statistic for graph
+    Compute generic statistic for a graph
     :param graph:
     :return:
     """

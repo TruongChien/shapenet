@@ -79,7 +79,8 @@ class ModelSpecs:
 
         # device
         self.device = 'cuda'
-        fmtl_print("Device", self.device)
+        if verbose:
+            fmtl_print("Device", self.device)
 
         # a file name or io.string
         self.config_file_name = template_file_name
@@ -434,6 +435,9 @@ class ModelSpecs:
         if debug:
             fmt_print("Settings list", _settings)
 
+        if self._active_setting not in _settings:
+            raise Exception("config.yaml use undefined variable {} ".format(self._active_setting))
+
         self._setting = _settings[self._active_setting].copy()
         if debug:
             fmt_print("Active settings", self._setting)
@@ -629,7 +633,7 @@ class ModelSpecs:
 
     def set_max_num_node(self, m: int):
         """
-
+        Update max node for Graph
         @param m:
         @return:
         """
@@ -637,7 +641,7 @@ class ModelSpecs:
 
     def set_max_prev_node(self, m: int):
         """
-
+        Update max prev nodes for BFS order
         @param m:
         @return:
         """
@@ -1353,22 +1357,20 @@ class ModelSpecs:
 
     def is_evaluate(self) -> bool:
         """
-        TODO
+        Return true if we need evaluate a model after a training.
         """
         if 'evaluate' in self.config:
             return bool(self.config['evaluate'])
 
         return False
 
-    #
-    # def prediction_files_generator(self):
-    #     files = self.get_active_model_prediction_files()
-    #     yield iter(files)
-
     def done(self):
         self.writer.close()
 
     def get_model_submodels(self) -> List[str]:
+        """
+        @return:  Return list of all sub models.
+        """
         keys = self.model.keys()
         return [k for k in keys]
 
@@ -1428,15 +1430,23 @@ class ModelSpecs:
 
     def mmd_clustering(self) -> bool:
         """
-        :return:
+        @return:  Return true of clustering statistic need to be collected.
         """
-        return True
+        if 'metrics' in self.config:
+            metrics = self.config['metrics']
+            if 'clustering' in metrics:
+                return metrics['clustering']
+        return False
 
     def mmd_orbits(self) -> bool:
         """
-        :return:
+        @return:  Return true of orbits statistic need to be collected.
         """
-        return True
+        if 'metrics' in self.config:
+            metrics = self.config['metrics']
+            if 'orbits' in metrics:
+                return metrics['orbits']
+        return False
 
     def tensorboard_sample_update(self):
         """
@@ -1451,7 +1461,7 @@ class ModelSpecs:
 
     def set_depth(self, graph_depth):
         """
-
+        Sets a graph depth.
         @param graph_depth:
         @return:
         """

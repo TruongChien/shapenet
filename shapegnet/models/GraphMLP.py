@@ -1,3 +1,10 @@
+# Graph Generator GRU Model
+#
+# This GraphRNN MLP for last edge layer RNN.
+#
+# https://arxiv.org/abs/1802.08773
+#
+# Mustafa B
 from __future__ import unicode_literals, print_function, division
 
 import torch.nn as nn
