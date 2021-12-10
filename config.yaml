@@ -1,13 +1,13 @@
 train: True                 # train or not,  default is True for generation we only need load pre-trained model
-#active: 'grid_small'        # dataset set generated.
-active: 'hex_lattice'        # dataset set generated.
+#active: 'grid_small'       # dataset set generated.
+active: 'hex_lattice'       # dataset set generated.
 use_model: 'GraphGruRnn'    # model to use , it must be defined in models section.
 draw_prediction: True       # at the of training draw.
 load_model: True            # load model or not, and what
 load_epoch: 500             # load model.  last epoch
 save_model: True            # save model,
 regenerate: True            # regenerated,  factor when indicated by epochs_save
-active_setting: baseline    # indicate what setting to use, so we can switch from debug to production
+active_setting: medium      # indicate what setting to use, so we can switch from debug to production
 evaluate: True              # will run evaluation
 
 early_stopping:
@@ -44,12 +44,12 @@ settings:
     tensorboard_update: 100
   # baseline
   medium:
+    tensorboard_update: 20
     early_stopping: True
     epochs_log: 1000
-    start_test: 50
-    epochs_test: 50
-    epochs_save: 50
-    tensorboard_update: 50
+    start_test: 20
+    epochs_test: 20
+    epochs_save: 20
 
 debug:
   # debug graph generation
@@ -143,7 +143,7 @@ graph:
   # Generated Grid
   hex_lattice:
     epochs: 500
-    parameter_shrink: 2
+    parameter_shrink: 1
     batch_size: 32
     test_batch_size: 32
     test_total_size: 1000

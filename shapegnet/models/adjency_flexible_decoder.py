@@ -2,7 +2,7 @@ import numpy as np
 
 
 class AdjacencyFlexDecoder:
-    def __init__(self, device='cpu'):
+    def __init__(self, device='cuda'):
         self.device = device
 
     @staticmethod

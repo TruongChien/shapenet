@@ -46,7 +46,7 @@ class RnnGenerator(GeneratorTrainer):
         super(RnnGenerator, self).__init__(verbose=verbose, is_notebook=is_notebook)
         #
         # self.is_notebook = is_notebook
-        fmt_print("Creating generator", "RnnGenerator")
+        fmtl_print("Creating generator", "RnnGenerator")
 
         # this is mostly for debugging code
         self.debug = False
@@ -155,9 +155,9 @@ class RnnGenerator(GeneratorTrainer):
 
     def create_lr_scheduler(self, optimizer, alias_name: str):
         """
-        Creates lr scheduler based on specs
-        @param optimizer:
-        @param alias_name:
+        Creates lr scheduler based on experiment specification.
+        @param optimizer: class optimizer.
+        @param alias_name: name defined in config.yaml
         @return:
         """
         lr_scheduler_type = self.trainer_spec.lr_scheduler_type(alias_name)
@@ -166,7 +166,7 @@ class RnnGenerator(GeneratorTrainer):
                 fmtl_print("Creating {} lr scheduler.".format(alias_name), "cos")
             scheduler = lr_scheduler.CosineAnnealingLR(optimizer,
                                                        T_max=self.trainer_spec.epochs(),
-                                                       eta_min=self.trainer_spec.min_lr())
+                                                       eta_min=self.trainer_spec.min_lr(alias_name))
         elif lr_scheduler_type == 'multistep':
             if self.verbose:
                 fmtl_print("Creating {} lr scheduler.".format(alias_name), "multistep")
@@ -190,7 +190,7 @@ class RnnGenerator(GeneratorTrainer):
     @torch.no_grad()
     def model_prediction(self):
         """
-        Model Prediction,  Generate graph prediction
+        Model Prediction, Generate graph prediction
         and saves each prediction as graph file.
         :return:
         """
@@ -252,9 +252,9 @@ class RnnGenerator(GeneratorTrainer):
 
     def prepare_data(self, data):
         """
-
-        :param data:
-        :return:
+        Prepare x and y.
+        :param data: a batch of examples
+        :return: x, y
         """
         y_len_unsorted = data['len']
         y_len_max = max(y_len_unsorted)
@@ -299,11 +299,10 @@ class RnnGenerator(GeneratorTrainer):
 
     def train_epoch(self, epoch):
         """
-
-        :param epoch:
+        Main training batch loop size , forward pass
+        :param epoch: current epoch, trainer executing.
         :return:
         """
-
         self.node_rnn.train()
         self.edge_rnn.train()
         twriter = self.trainer_spec.writer
@@ -336,7 +335,7 @@ class RnnGenerator(GeneratorTrainer):
             if self.criterion is None:
                 y_predicted = torch.sigmoid(y_predicted)
 
-            # pack and pad
+            # pack and pad and pass to a loss.
             y_predicted = pack_padded_sequence(y_predicted, output_y_len, batch_first=True)
             y_predicted = pad_packed_sequence(y_predicted, batch_first=True)[0]
             output_y = pack_padded_sequence(output_y, output_y_len, batch_first=True)

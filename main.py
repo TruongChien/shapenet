@@ -19,6 +19,9 @@ import numpy as np
 import torch
 import torch.utils as tutil
 import seaborn as sns
+import pandas as pd
+from datetime import datetime
+import matplotlib as plt
 
 from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
 from shapegnet.generator_trainer import GeneratorTrainer
@@ -29,12 +32,10 @@ from shapegnet.models.sampler.GraphSeqSampler import GraphSeqSampler
 from shapegnet.plotlib import plot
 from shapegnet.plotlib.plot import draw_single_graph
 from shapegnet.utils import fmt_print, fmtl_print, find_nearest
-import pandas as pd
-from datetime import datetime
-
-from shapenet.shapegnet.dataset_generators import GraphDatasetFactory
+from shapegnet.dataset_generators import GraphDatasetFactory
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cudnn.benchmark = True
 
 TRAIN: Final = 1
 TEST: Final = 2

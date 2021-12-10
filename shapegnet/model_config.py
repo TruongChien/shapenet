@@ -759,7 +759,7 @@ class ModelSpecs:
         Setup tensorflow dir
         """
         time = strftime("%Y-%m-%d-%H", gmtime())
-        fmt_print("tensorboard log dir", self.log_dir())
+        fmtl_print("tensorboard log dir", self.log_dir())
         logging.basicConfig(filename=str(self.dir_log / Path('train' + time + '.log')), level=logging.DEBUG)
         if bool(self.config['regenerate']):
             if os.path.isdir("tensorboard"):
@@ -1111,22 +1111,34 @@ class ModelSpecs:
 
         return None
 
-    def min_lr(self, name):
-        pass
+    def min_lr(self, alias_name) -> float:
+        """
+        Learning rate of each parameter group using a cosine annealing schedule
+        @param alias_name:  configuration alias_name defined in config
+        @return: Minimum learning rate. Default: 0
+        """
+        opt = self._optimizers[alias_name]
+        if 'eta_min' in opt:
+            return float(opt['eta_min'])
+        else:
+            return float(0)
 
     def compute_num_samples(self):
         """
-
         """
         return self.batch_size() * self.batch_ratio()
 
     def lr_lambdas(self, alias_name):
         """
-        TODO
-        @param alias_name:
-        @return:
+        A function which computes a multiplicative factor given an integer parameter epoch,
+        or a list of such functions, one for each group in optimizer.param_groups.
+        @param alias_name: configuration alias_name defined in config
+        @return: list
         """
-        pass
+        opt = self._optimizers[alias_name]
+        if 'lr_lambda' in opt:
+            return opt['lr_lambda']
+        raise Exception("Optimizer has no type defined")
 
     def is_read_benchmark(self):
         """
