@@ -55,16 +55,15 @@ class GraphSeqSampler(torch.utils.data.Dataset):
 
     def __len__(self):
         """
-
         @return:
         """
-        if self.depth is None or self.depth == 0:
-            self.n = max(self.len_all)
-            print("Len COMPUTED MAX NODE DEPTH", self.n)
-
-        if self.depth is None or self.depth == 0:
-            self.depth = max(self.compute_max_depth())
-            print("Len COMPUTED MAX DEPTH", self.depth)
+        # if self.depth is None or self.depth == 0:
+        #     self.n = max(self.len_all)
+        #     print("Len COMPUTED MAX NODE DEPTH", self.n)
+        #
+        # if self.depth is None or self.depth == 0:
+        #     self.depth = max(self.compute_max_depth())
+        #     print("Len COMPUTED MAX DEPTH", self.depth)
 
         return len(self.A)
 
@@ -73,13 +72,13 @@ class GraphSeqSampler(torch.utils.data.Dataset):
          Return training batch
          @return: x, y and len batch as dict 'x', 'y', 'len'
         """
-        if self.n is None or self.n == 0:
-            self.n = max(self.len_all)
-            print("Get Item COMPUTED MAX NODE DEPTH", self.n)
-
-        if self.depth is None or self.depth == 0:
-            self.depth = max(self.compute_max_depth())
-            print("Get Item COMPUTED MAX DEPTH", self.depth)
+        # if self.n is None or self.n == 0:
+        #     self.n = max(self.len_all)
+        #     print("Get Item COMPUTED MAX NODE DEPTH", self.n)
+        #
+        # if self.depth is None or self.depth == 0:
+        #     self.depth = max(self.compute_max_depth())
+        #     print("Get Item COMPUTED MAX DEPTH", self.depth)
 
         A = self.A[idx].copy()
 

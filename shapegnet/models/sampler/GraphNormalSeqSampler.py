@@ -42,8 +42,3 @@ class GraphSeqNormalSampler(torch.utils.data.Dataset):
         y_batch[0:adj_encoded.shape[0], :] = adj_encoded
         x_batch[1:adj_encoded.shape[0] + 1, :] = adj_encoded
         return {'x': x_batch, 'y': y_batch, 'len': len_batch}
-
-# dataset = GraphSeqNormalSampler(graphs)
-# print(dataset[1]['x'])
-# print(dataset[1]['y'])
-# print(dataset[1]['len'])

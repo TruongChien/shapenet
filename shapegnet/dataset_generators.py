@@ -10,14 +10,14 @@ from .utils import fmt_print
 def dataset_graph_generator():
     """ Dataset create"""
     return {
-        'grid':          generate_grid,
-        'grid_small':    generate_grid,
-        'grid_big':      generate_grid,
-        'grid_min':      generate_grid,
-        'hex_lattice':   generate_hexagonal_lattice,
-        'caveman':       generate_caveman,
+        'grid': generate_grid,
+        'grid_small': generate_grid,
+        'grid_big': generate_grid,
+        'grid_min': generate_grid,
+        'hex_lattice': generate_hexagonal_lattice,
+        'caveman': generate_caveman,
         'caveman_small': generate_caveman,
-        'caveman_big':   generate_caveman,
+        'caveman_big': generate_caveman,
     }
 
 
@@ -29,7 +29,6 @@ def gracefully_exit(msg):
 
 
 def generate_hexagonal_lattice(specs: ModelSpecs, m=2, n=2):
-
     if specs.is_graph_creator_verbose():
         fmt_print("Generating grid graph type", "backend nx")
 
@@ -51,7 +50,7 @@ def generate_hexagonal_lattice(specs: ModelSpecs, m=2, n=2):
     for i in range(0, 5):
         graphs.append(nx.hexagonal_lattice_graph(m, n))
 
-    # specs.set_depth(10)
+    specs.set_depth(10)
     return graphs
 
 
@@ -113,10 +112,16 @@ def citeseer(radius=1, min_nodes=4, max_nodes=20, split=200, is_shuffled=True):
     return 15, graphs
 
 
-def ladder_graph(start_range, stop_range):
+def ladder_graph(start_range, stop_range, is_verbose=False):
     """
+    Generate nx ladder graphs.
+    @param start_range:
+    @param stop_range:
+    @param is_verbose:
+    @return:
     """
-    print("Creating ladder graph..")
+    if is_verbose:
+        print("Creating ladder graph..")
     graphs = []
     for i in range(start_range, stop_range):
         graphs.append(nx.ladder_graph(i))
@@ -126,7 +131,13 @@ def ladder_graph(start_range, stop_range):
 
 def tree_graph(ix, iy, jx, jy, is_verbose):
     """
-
+    Generate nx tree graphs.
+    @param ix:
+    @param iy:
+    @param jx:
+    @param jy:
+    @param is_verbose:
+    @return:
     """
     if is_verbose:
         print("Creating tree graph {} {} {} {}".format(ix, iy, jx, jy))
@@ -141,9 +152,10 @@ def tree_graph(ix, iy, jx, jy, is_verbose):
 
 def generate_caveman(specs: ModelSpecs):
     """
-    Parameters
-      l int number of cliques
-      k int size of cliques (k at least 2 or NetworkXError is raised)
+    Create Caveman Graph.
+
+    @param specs: number of cliques
+    @return: int size of cliques (k at least 2 or NetworkXError is raised)
     """
     if specs.is_graph_creator_verbose():
         fmt_print("Generating graph type", "caveman nx graph")
@@ -168,10 +180,24 @@ def generate_caveman(specs: ModelSpecs):
     return graphs
 
 
-def create(specs: ModelSpecs):
+class GraphDatasetFactory:
     """
-    Method lookup graph and forward to respected creator.
+
     """
-    dispatch = dataset_graph_generator()
-    g = dispatch[specs.active](specs)
-    return g
+    def __init__(self, specs: ModelSpecs, verbose=False):
+        """
+
+        @param specs:
+        @param verbose:
+        """
+        self.specs = specs
+        self.verbose = verbose
+
+    def create(self):
+        """
+        Method lookup graph and forward to respected creator.
+        @return: generated graph.
+        """
+        dispatch = dataset_graph_generator()
+        g = dispatch[self.specs.active](self.specs)
+        return g

@@ -38,7 +38,6 @@ class Generator(nn.Module):
         self.lstmcell = LSTMCell(H_inputs, H).type(torch.float64)
         self.lstmcell_lines = LSTMCell(H_inputs, H).type(torch.float64)
 
-
         self.W_up = nn.Linear(H, N).type(torch.float64)
         self.W_down = nn.Linear(N, H_inputs, bias=False).type(torch.float64)
         self.W_down_lines = nn.Linear(N, H_inputs, bias=False).type(torch.float64)
@@ -51,7 +50,7 @@ class Generator(nn.Module):
         self.H_inputs = H_inputs
         self.freeze_params(state)
 
-    def forward(self, latent, inputs, device='cuda'):   # h_down = input_zeros
+    def forward(self, latent, inputs, device='cuda'):  # h_down = input_zeros
         intermediate = torch.tanh(self.intermediate(latent))
         intermediate_lines = torch.tanh(self.intermediate_lines(latent))
         hc = (torch.tanh(self.h_up(intermediate)), torch.tanh(self.c_up(intermediate)))
@@ -60,9 +59,9 @@ class Generator(nn.Module):
         for i in range(self.rw_len):
             hh, cc = self.lstmcell(inputs, hc)
             hc = (hh, cc)
-            h_up = self.W_up(hh)                # blow up to dimension N using W_up
+            h_up = self.W_up(hh)  # blow up to dimension N using W_up
             h_sample = self.gumbel_softmax_sample(h_up, self.temp, device)
-            inputs = self.W_down(h_sample)      # back to dimension H (in netgan they reduce the dimension to d)
+            inputs = self.W_down(h_sample)  # back to dimension H (in netgan they reduce the dimension to d)
             out.append(h_sample)
         for j in range(self.rw_len):
             inputs_lines = self.W_down_lines(out[j])
@@ -75,11 +74,10 @@ class Generator(nn.Module):
     def sample_latent(self, num_samples, device):
         return torch.randn((num_samples, self.latent_dim)).type(torch.float64).to(device)
 
-
     def sample(self, num_samples, device):
         noise = self.sample_latent(num_samples, device)
         input_zeros = self.init_hidden(num_samples).contiguous().type(torch.float64).to(device)
-        generated_data, generated_weights = self(noise,  input_zeros, device)
+        generated_data, generated_weights = self(noise, input_zeros, device)
         return generated_data, generated_weights
 
     def sample_discrete(self, num_samples, device):
@@ -91,7 +89,7 @@ class Generator(nn.Module):
         U = torch.rand(logits.shape, dtype=torch.float64)
         return -torch.log(-torch.log(U + eps) + eps)
 
-    def gumbel_softmax_sample(self, logits,  temperature, device, hard=True):
+    def gumbel_softmax_sample(self, logits, temperature, device, hard=True):
         """ Draw a sample from the Gumbel-Softmax distribution"""
         gumbel = self.sample_gumbel(logits).type(torch.float64).to(device)
         y = logits + gumbel
@@ -106,7 +104,7 @@ class Generator(nn.Module):
         return weight.new(batch_size, self.H_inputs).zero_().type(torch.float64)
 
     def freeze_params(self, state):
-        if(state=='structure'):
+        if state == 'structure':
             self.intermediate_lines.weight.requires_grad_(False)
             self.intermediate_lines.bias.requires_grad_(False)
             self.h_up_lines.weight.requires_grad_(False)
@@ -130,7 +128,7 @@ class Generator(nn.Module):
             self.W_down.weight.requires_grad_(True)
             self.W_up.weight.requires_grad_(True)
             self.W_up.bias.requires_grad_(True)
-        else:   # state = 'lines'
+        else:  # state = 'lines'
             self.intermediate_lines.weight.requires_grad_(True)
             self.intermediate_lines.bias.requires_grad_(True)
             self.h_up_lines.weight.requires_grad_(True)
@@ -156,9 +154,6 @@ class Generator(nn.Module):
             self.W_up.bias.requires_grad_(False)
 
 
-
-
-
 class Discriminator(nn.Module):
     def __init__(self, H_inputs, H, N, rw_len):
         """
@@ -170,7 +165,7 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.W_down = nn.Linear(N, H_inputs, bias=False).type(torch.float64)
         torch.nn.init.xavier_uniform_(self.W_down.weight)
-        self.lstmcell = LSTMCell(H_inputs+1, H).type(torch.float64)
+        self.lstmcell = LSTMCell(H_inputs + 1, H).type(torch.float64)
         self.lin_out = nn.Linear(H, 1, bias=True).type(torch.float64)
         torch.nn.init.xavier_uniform_(self.lin_out.weight)
         torch.nn.init.zeros_(self.lin_out.bias)
@@ -179,7 +174,7 @@ class Discriminator(nn.Module):
         self.rw_len = rw_len
         self.H_inputs = H_inputs
 
-    #def forward(self, x_rw, x_weights):
+    # def forward(self, x_rw, x_weights):
     def forward(self, x):
         x_rw = x[:, :, :self.N]
         x_weights = x[:, :, -1:]
@@ -200,9 +195,10 @@ class Discriminator(nn.Module):
 
     def init_hidden(self, num_samples):
         weight = next(self.parameters()).data
-        return (weight.new(num_samples, self.H).zero_().contiguous().type(torch.float64), weight.new(num_samples, self.H).zero_().contiguous().type(torch.float64))
+        return (weight.new(num_samples, self.H).zero_().contiguous().type(torch.float64),
+                weight.new(num_samples, self.H).zero_().contiguous().type(torch.float64))
 
-    #def reset_weights(self):
+    # def reset_weights(self):
     #    import h5py
     #    weights = h5py.File(r'C:\Users\Data Miner\PycharmProjects\Master_Projekt4\weights.h5', 'r')
     #    self.W_down.weight = torch.nn.Parameter(torch.tensor(np.array(weights.get('W_down_discriminator')).T).type(torch.float64))
@@ -211,13 +207,14 @@ class Discriminator(nn.Module):
     #    self.lstmcell.cell.weight = torch.nn.Parameter(torch.tensor(np.array(weights.get('discriminator_lstm')).T).type(torch.float64))
     #    self.lstmcell.cell.bias = torch.nn.Parameter(torch.tensor(np.array(weights.get('discriminator_lstm_bias'))).type(torch.float64))
 
+
 class LSTMCell(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(LSTMCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
 
-        self.cell = nn.Linear(input_size+hidden_size, 4 * hidden_size, bias=True)
+        self.cell = nn.Linear(input_size + hidden_size, 4 * hidden_size, bias=True)
         torch.nn.init.xavier_uniform_(self.cell.weight)
         torch.nn.init.zeros_(self.cell.bias)
 

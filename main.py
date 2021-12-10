@@ -20,7 +20,6 @@ import torch
 import torch.utils as tutil
 import seaborn as sns
 
-from shapegnet import create_graphs
 from shapegnet.external.graphrnn_eval.stats import degree_stats, clustering_stats, orbit_stats_all
 from shapegnet.generator_trainer import GeneratorTrainer
 from shapegnet.model_config import ModelSpecs
@@ -31,8 +30,9 @@ from shapegnet.plotlib import plot
 from shapegnet.plotlib.plot import draw_single_graph
 from shapegnet.utils import fmt_print, fmtl_print, find_nearest
 import pandas as pd
-import matplotlib as plt
 from datetime import datetime
+
+from shapenet.shapegnet.dataset_generators import GraphDatasetFactory
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -133,12 +133,13 @@ def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
         dataset = GraphSeqSampler(graphs,
                                   max_depth=trainer_spec.max_depth(),
                                   max_nodes=trainer_spec.max_nodes())
-        trainer_spec.set_depth(dataset.depth)
-        trainer_spec.set_max_num_node(dataset.n)
     else:
         dataset = GraphSeqSampler(graphs)
 
-    normalized_weight = [1.0 / len(dataset) for i in range(len(dataset))]
+    trainer_spec.set_depth(dataset.depth)
+    trainer_spec.set_max_num_node(dataset.n)
+
+    normalized_weight = [1.0 / len(dataset) for _ in range(len(dataset))]
     sample_strategy = tutil.data.sampler.WeightedRandomSampler(normalized_weight,
                                                                num_samples=trainer_spec.compute_num_samples(),
                                                                replacement=True)
@@ -211,7 +212,7 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
     """
     During evaluation phase, we compute MMD statistic for graphs.
     Stats for degree, clustering etc.
-    @param trainer_spec:  a experiment specification
+    @param trainer_spec: a experiment specification
     @param is_verbose:  verbose output
     @param last_epoch_only:  use only prediction from a last epoc
     @param default_loc:  location where we want to store panda generated cvs file.
@@ -241,7 +242,7 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
     mmd_degrees_validates = []
     mmd_clustering_predict = []
     mmd_clustering_validate = []
-    if trainer_spec.mmd_orbits:
+    if trainer_spec.mmd_orbits is True:
         mmd_orbits_predict = []
         mmd_orbits_validate = []
     epochs = []
@@ -285,15 +286,15 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
             mmd_clustering_predict.append(mmd_clustering_a.copy())
             mmd_clustering_validate.append(mmd_clustering_b.copy())
 
-        if trainer_spec.mmd_orbits:
+        if trainer_spec.mmd_orbits() is True:
             mmd_orbits_a = orbit_stats_all(test_set, predication_selection)
             mmd_orbits_b = clustering_stats(test_set, validate_set)
-            fmtl_print('Clustering train/Generated MMD', mmd_orbits_a)
-            fmtl_print('Clustering train/Validation MMD', mmd_orbits_b)
+            fmtl_print('Clustering train/Generated MMD', mmd_orbits_a.copy())
+            fmtl_print('Clustering train/Validation MMD', mmd_orbits_b.copy)
             mmd_orbits_predict.append(mmd_orbits_a.copy())
             mmd_orbits_validate.append(mmd_orbits_b.copy())
 
-    if trainer_spec.mmd_orbits:
+    if trainer_spec.mmd_orbits is True:
         list_of_tuples = list(
             zip(epochs, mmd_degree_predict, mmd_degrees_validates,
                 mmd_clustering_predict, mmd_clustering_validate,
@@ -331,23 +332,32 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
 def evaluate(cmds, trainer_spec: ModelSpecs,
              last_epoch_only=False,
              default_loc=None):
-    frame = evaluate_prediction(trainer_spec,
-                                last_epoch_only=last_epoch_only,
-                                default_loc=default_loc)
-    sns.set_theme()
-    df = frame.astype(float)
+    """
+    Evaluate and compute all generated graph statistic
+    @param cmds: args passed to cli
+    @param trainer_spec:  a experiment specification
+    @param last_epoch_only: if we only want compute statistic for last epoch
+    @param default_loc: where to store panda file.
+    @return:
+    """
+    if cmds is not None and cmds.plot_training:
+        frame = evaluate_prediction(trainer_spec,
+                                    last_epoch_only=last_epoch_only,
+                                    default_loc=default_loc)
+        sns.set_theme()
+        df = frame.astype(float)
 
-    sns.relplot(
-        data=df, kind="line",
-        x="epoch", y="pdegree", style="vdegree",
-    ).figure.savefig("degree.png")
+        sns.relplot(
+            data=df, kind="line",
+            x="epoch", y="pdegree", style="vdegree",
+        ).figure.savefig("degree.png")
 
-    sns.relplot(
-        data=df, kind="line",
-        x="epoch", y="pcluster", style="vcluster",
-    ).figure.savefig("vcluster.png")
+        sns.relplot(
+            data=df, kind="line",
+            x="epoch", y="pcluster", style="vcluster",
+        ).figure.savefig("vcluster.png")
 
-    sns.pairplot(df, hue="epoch").figure.savefig("paied.png")
+        sns.pairplot(df, hue="epoch").figure.savefig("paired.png")
 
 
 def main_train(cmds, trainer_spec: ModelSpecs):
@@ -371,7 +381,7 @@ def main_train(cmds, trainer_spec: ModelSpecs):
     fmtl_print("Maximum nodes to track", trainer_spec.max_nodes())
 
     # create dataset based on specs in config.yaml
-    graphs = create_graphs.create(trainer_spec)
+    graphs = GraphDatasetFactory(trainer_spec).create()
     max_num_node = max([graphs[i].number_of_nodes() for i in range(len(graphs))])
     min_num_edge = min([graphs[i].number_of_edges() for i in range(len(graphs))])
     max_num_edge = max([graphs[i].number_of_edges() for i in range(len(graphs))])
@@ -395,7 +405,6 @@ def main_train(cmds, trainer_spec: ModelSpecs):
 
     # load_pretrained(trainer_spec)
     # save ground truth graphs
-    # To get train and test set, after loading you need to manually slice
     GeneratorTrainer.save_graphs(graphs, str(trainer_spec.train_graph_file()))
     GeneratorTrainer.save_graphs(graphs, str(trainer_spec.test_graph_file()))
 

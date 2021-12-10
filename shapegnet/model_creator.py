@@ -6,6 +6,7 @@ from .generator_trainer import GeneratorTrainer
 from .model_config import ModelSpecs
 from .models.GraphGru import GraphGRU
 from .models.GraphLSTM import GraphLSTM
+from .models.NetGanModified import Generator, Discriminator
 from .rnn_generator import RnnGenerator
 from .utils import fmtl_print
 
@@ -15,7 +16,8 @@ class ModelCreator:
      Create model and model trainer.
 
     """
-    def __init__(self, trainer_spec: ModelSpecs, device, debug=False, verbose=False):
+
+    def __init__(self, trainer_spec: ModelSpecs, device='cuda', debug=False, verbose=False):
         """
          Construct model creator,  it take trainer spec object and
          create model that indicate as active model.
@@ -45,7 +47,7 @@ class ModelCreator:
         self.model_dispatch, self.trainer_dispatch = self.create_model_dispatch()
         self.create_model_dispatch()
 
-    def create_lstm_rnn(self, trainer_spec, device):
+    def create_lstm_rnn(self, trainer_spec: ModelSpecs):
         """
         Factory method create model based https://arxiv.org/abs/1802.08773
         Instead we use LSTM
@@ -58,7 +60,7 @@ class ModelCreator:
                              has_input=True,
                              has_output=True,
                              num_layers=trainer_spec.num_layers(),
-                             device=device).to(device)
+                             device=self.device).to(self.device)
 
         edge_rnn = GraphLSTM(input_size=1,
                              embedding_size=trainer_spec.embedding_size_rnn_output,
@@ -67,12 +69,29 @@ class ModelCreator:
                              has_input=True,
                              has_output=True,
                              output_size=1,
-                             device=device).to(device)
+                             device=self.device).to(self.device)
 
         models['node_model'] = node_rnn
         models['edge_model'] = edge_rnn
 
         return models
+
+    def create_gan(self, trainer_spec: ModelSpecs):
+        models = {}
+
+        generator = Generator(H_inputs=trainer_spec.H_inp(),
+                              H=trainer_spec.H_gen(),
+                              N=trainer_spec.N(),
+                              rw_len=trainer_spec.rw_len(), z_dim=trainer_spec.z_dim(),
+                              temp=trainer_spec.temp_start()).to(self.device)
+
+        discriminator = Discriminator(H_inputs=trainer_spec.H_inp(),
+                                      H=trainer_spec.H_disc(),
+                                      N=trainer_spec.N(),
+                                      rw_len=trainer_spec.rw_len()).to(self.device)
+
+        models['generator'] = generator
+        models['discriminator'] = discriminator
 
     def create_gru_rnn(self, trainer_spec: ModelSpecs):
         """

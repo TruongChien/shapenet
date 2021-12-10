@@ -20,6 +20,8 @@ class AdjacencyEncoder:
         """
         if is_full:
             self.depth = adj.shape[0] - 1
+        else:
+            depth = self.depth
 
         # pick up lower tri
         adj = np.tril(adj, k=-1)

@@ -37,7 +37,7 @@ class RnnGenerator(GeneratorTrainer):
                  dataset: tutil.data.DataLoader,
                  models: dict,
                  decoder: AbstractGraphDecoder,
-                 device='cpu',
+                 device='cuda',
                  verbose=False,
                  is_notebook=True):
         """

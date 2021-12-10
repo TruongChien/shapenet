@@ -1,5 +1,6 @@
 train: True                 # train or not,  default is True for generation we only need load pre-trained model
-active: 'grid_small'        # dataset set generated.
+#active: 'grid_small'        # dataset set generated.
+active: 'hex_lattice'        # dataset set generated.
 use_model: 'GraphGruRnn'    # model to use , it must be defined in models section.
 draw_prediction: True       # at the of training draw.
 load_model: True            # load model or not, and what
@@ -41,6 +42,14 @@ settings:
     epochs_test: 100
     epochs_save: 100
     tensorboard_update: 100
+  # baseline
+  medium:
+    early_stopping: True
+    epochs_log: 1000
+    start_test: 50
+    epochs_test: 50
+    epochs_save: 50
+    tensorboard_update: 50
 
 debug:
   # debug graph generation
@@ -145,8 +154,8 @@ graph:
     graph_spec:
       hex_m: 4
       hex_n: 4
-    max_num_node: 16
-    max_prev_node: 9
+#    max_num_node: 16
+#    max_prev_node: 9
   grid:
     epochs: 100
     parameter_shrink: 1

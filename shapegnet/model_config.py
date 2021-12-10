@@ -1260,16 +1260,17 @@ class ModelSpecs:
 
     def get_prediction_graph(self, num_samples=1, reverse=False, is_last=False) -> List[nx.classes.graph.Graph]:
         """
-        Method return generator for all prediction files.
+        Method returns generator / iterator for all prediction files.
         A Caller can iterate each iter call will return one file name.
-
         Note file are sorted.
+
         :param num_samples:
         :param reverse:
         :param is_last:
         :return:
         """
         if is_last is True:
+            #TODO check this
             files = self.get_active_model_prediction_files(reverse=reverse)
             epoch = extract_value_from_file(files, "epoch")
             sample_time = extract_value_from_file(files, "sample")
@@ -1330,7 +1331,7 @@ class ModelSpecs:
 
     # def load_models(self, model):
     # """
-    # TODO not important for noe
+    # TODO
     # """
     # checkpoints = {}
     # models_filenames = self.model_filenames()
@@ -1445,7 +1446,8 @@ class ModelSpecs:
         if 'metrics' in self.config:
             metrics = self.config['metrics']
             if 'orbits' in metrics:
-                return metrics['orbits']
+                return bool(metrics['orbits'])
+
         return False
 
     def tensorboard_sample_update(self):
@@ -1467,3 +1469,36 @@ class ModelSpecs:
         """
         if 'max_prev_node' in self.graph_specs:
             self.graph_specs['max_prev_node'] = graph_depth
+        else:
+            self.graph_specs['max_prev_node'] = graph_depth
+
+
+    def H_inp(self):
+        """
+        Input size of the LSTM-Cells
+        @return:
+        """
+        pass
+
+    def H_gen(self):
+        """
+        The hidden_size of the generator.
+        @return:  int, default: 40
+
+        """
+        return 40
+
+    def rw_len(self):
+        pass
+
+    def z_dim(self):
+        pass
+
+    def temp_start(self):
+        pass
+
+    def H_disc(self):
+        pass
+
+    def N(self):
+        pass
