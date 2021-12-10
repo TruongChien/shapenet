@@ -224,7 +224,6 @@ class RnnGenerator(GeneratorTrainer):
                 output_y_pred_step = self.edge_rnn(output_x_step)
                 output_x_step = sample_sigmoid(output_y_pred_step,
                                                sample=True,
-                                               sample_time=1,
                                                device=self.device)
                 # adjust edge
                 x_step[:, :, j:j + 1] = output_x_step
