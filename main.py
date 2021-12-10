@@ -5,7 +5,6 @@
 #
 # In both cases, my aim to generate realistic graphs and analyze how a model can generalize.
 #
-#
 # Author Mustafa Bayramov
 import argparse
 import random
@@ -124,7 +123,6 @@ def prepare(trainer_spec):
 def create_dataset_sampler(trainer_spec: ModelSpecs, graphs, num_workers=None):
     """
     Creates dataset , dataset sampler based on trainer specification.
-
     @param trainer_spec: trainer specification, include strategy how to sample ration etc.
     @param graphs: a graph that we use to train network.
     @param num_workers:
@@ -210,6 +208,15 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
                         is_verbose=False,
                         last_epoch_only=False,
                         default_loc=None):
+    """
+    During evaluation phase, we compute MMD statistic for graphs.
+    Stats for degree, clustering etc.
+    @param trainer_spec:  a experiment specification
+    @param is_verbose:  verbose output
+    @param last_epoch_only:  use only prediction from a last epoc
+    @param default_loc:  location where we want to store panda generated cvs file.
+    @return: panda frame
+    """
     sns.set()
 
     # get a graphs
@@ -234,8 +241,9 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
     mmd_degrees_validates = []
     mmd_clustering_predict = []
     mmd_clustering_validate = []
-    mmd_orbits_predict = []
-    mmd_orbits_validate = []
+    if trainer_spec.mmd_orbits:
+        mmd_orbits_predict = []
+        mmd_orbits_validate = []
     epochs = []
 
     compute_generic_stats(test_set)
@@ -261,16 +269,14 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
             predication_selection.append(epoch_predicted[j])
 
         # evaluate mmd test, between prediction and test
-        mmd_degree = -1
         if trainer_spec.mmd_degree():
-            mmd_degree = degree_stats(test_set, predication_selection)
-            mmd_degree_validate = degree_stats(test_set, validate_set)
-            fmtl_print('Degree train/Generated MMD', mmd_degree)
-            fmtl_print('Degree train/Validation MMD', mmd_degree_validate)
-            mmd_degree_predict.append(mmd_degree.copy())
-            mmd_degrees_validates.append(mmd_degree_validate.copy())
+            mmd_degree_a = degree_stats(test_set, predication_selection)
+            mmd_degree_b = degree_stats(test_set, validate_set)
+            fmtl_print('Degree train/Generated MMD', mmd_degree_a)
+            fmtl_print('Degree train/Validation MMD', mmd_degree_b)
+            mmd_degree_predict.append(mmd_degree_a.copy())
+            mmd_degrees_validates.append(mmd_degree_b.copy())
         #
-        mmd_clustering = -1
         if trainer_spec.mmd_clustering():
             mmd_clustering_a = clustering_stats(test_set, predication_selection)
             mmd_clustering_b = clustering_stats(test_set, validate_set)
@@ -279,26 +285,47 @@ def evaluate_prediction(trainer_spec: ModelSpecs,
             mmd_clustering_predict.append(mmd_clustering_a.copy())
             mmd_clustering_validate.append(mmd_clustering_b.copy())
 
+        if trainer_spec.mmd_orbits:
+            mmd_orbits_a = orbit_stats_all(test_set, predication_selection)
+            mmd_orbits_b = clustering_stats(test_set, validate_set)
+            fmtl_print('Clustering train/Generated MMD', mmd_orbits_a)
+            fmtl_print('Clustering train/Validation MMD', mmd_orbits_b)
+            mmd_orbits_predict.append(mmd_orbits_a.copy())
+            mmd_orbits_validate.append(mmd_orbits_b.copy())
+
+    if trainer_spec.mmd_orbits:
+        list_of_tuples = list(
+            zip(epochs, mmd_degree_predict, mmd_degrees_validates,
+                mmd_clustering_predict, mmd_clustering_validate,
+                mmd_orbits_predict, mmd_orbits_validate))
+
+        df = pd.DataFrame(list_of_tuples, columns=['epoch',
+                                                   'pdegree',
+                                                   'vdegree',
+                                                   'pcluster',
+                                                   'vcluster'
+                                                   'porbits',
+                                                   'vorbits'])
+    else:
         list_of_tuples = list(
             zip(epochs, mmd_degree_predict, mmd_degrees_validates, mmd_clustering_predict,
                 mmd_clustering_validate))
 
-        # print(list_of_tuples)
         df = pd.DataFrame(list_of_tuples, columns=['epoch',
                                                    'pdegree',
                                                    'vdegree',
                                                    'pcluster',
                                                    'vcluster'])
 
-        ts = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-        if default_loc is None:
-            file_name = 'eval_stats' + ts + '.csv'
-            df.to_csv(file_name)
-        else:
-            _path = Path(default_loc) / 'eval_stats'
-            df.to_csv(_path + ts + '.csv')
+    ts = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+    if default_loc is None:
+        file_name = 'eval_stats' + ts + '.csv'
+        df.to_csv(file_name)
+    else:
+        _path = Path(default_loc) / 'eval_stats'
+        df.to_csv(str(_path) + ts + '.csv')
 
-        return df
+    return df
 
 
 def evaluate(cmds, trainer_spec: ModelSpecs,
@@ -307,22 +334,29 @@ def evaluate(cmds, trainer_spec: ModelSpecs,
     frame = evaluate_prediction(trainer_spec,
                                 last_epoch_only=last_epoch_only,
                                 default_loc=default_loc)
+    sns.set_theme()
     df = frame.astype(float)
-    # df.plot(kind='line', x='vdegree', y='pdegree', ax=ax)
 
-    plt.style.use('ggplot')
+    sns.relplot(
+        data=df, kind="line",
+        x="epoch", y="pdegree", style="vdegree",
+    ).figure.savefig("degree.png")
 
-    x1 = pd.Series(df['pdegree'], name='pred_degree')
-    x2 = pd.Series(df['vdegree'], name='val_degree')
+    sns.relplot(
+        data=df, kind="line",
+        x="epoch", y="pcluster", style="vcluster",
+    ).figure.savefig("vcluster.png")
 
-    sns.pairplot(df,
-                 x_vars="epoch",
-                 y_vars=["vdegree", "pdegree"],).figure.savefig("output.png")
+    sns.pairplot(df, hue="epoch").figure.savefig("paied.png")
 
 
 def main_train(cmds, trainer_spec: ModelSpecs):
     """
-
+    Main entry for app, in colab setting we train and
+    inspect result in tensorboard.
+    @param cmds:  command line args
+    @param trainer_spec: experiment specification
+    @return:
     """
     # prepare test environment
     prepare(trainer_spec)

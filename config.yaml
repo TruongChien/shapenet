@@ -122,7 +122,7 @@ plots:
 
 metrics:
   degree: True
-  orbits: True
+  orbits: False
   clustering: True
 
 trace_prediction_timer: True
