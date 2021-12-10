@@ -50,7 +50,7 @@ def sample_sigmoid(y, sample, thresh=0.5, device='cuda'):
     :return: sampled result
     """
 
-    y = F.sigmoid(y)
+    y = torch.sigmoid(y)
     if not sample:
         y_thresh = Variable(torch.ones(y.size(0),
                                        y.size(1),
